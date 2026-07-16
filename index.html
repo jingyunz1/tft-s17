@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TFT s17辅助脚本</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0B0E1A; --panel:#131A30; --panel2:#1A2240; --line:#26304F;
+    --txt:#F2F4FF; --dim:#8A93B5;
+    --c1:#9AA4AF; --c2:#4CAF6E; --c3:#4C8FE0; --c4:#B45BE6; --c5:#E3A93F;
+    --acc:#7A90FF; --gold:#E3A93F;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    min-height:100%;
+    background: radial-gradient(1100px 700px at 72% -10%, #1B2246 0%, var(--bg) 55%, #06070F 100%) fixed;
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Segoe UI",sans-serif;
+    padding-bottom:40px;
+  }
+  header{padding:16px 16px 8px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  header h1{font-size:1.2rem;letter-spacing:.06em;text-shadow:0 0 20px rgba(122,144,255,.35)}
+  header .ver{font-size:.7rem;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  main{padding:0 12px;display:flex;flex-direction:column;gap:12px;max-width:560px;margin:0 auto}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+  section h2{font-size:.8rem;color:var(--dim);font-weight:600;letter-spacing:.12em;margin-bottom:10px}
+  .mini{font-size:.74rem;color:var(--dim);line-height:1.55}
+  .btn{width:100%;padding:12px 0;border-radius:10px;border:1px solid var(--line);
+    background:#101632;color:var(--txt);font-size:.92rem;font-weight:600}
+  .btn:active{background:#232e5c}
+  /* comp cards */
+  .card{width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:12px;margin-bottom:10px;color:var(--txt)}
+  .card:active{background:#232e5c}
+  .card .top{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .card .nm{font-size:1rem;font-weight:700}
+  .tier{font-size:.68rem;font-weight:800;border-radius:6px;padding:2px 7px;color:#0B0E1A}
+  .tier.T1{background:#FF6B81}.tier.T2{background:var(--gold)}.tier.COLD{background:#7C86A8}
+  .tag{font-size:.66rem;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .stats{font-size:.7rem;color:var(--dim);margin-top:4px}
+  /* items */
+  .role{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px}
+  .role .rh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .rname{font-size:.72rem;color:#0B0E1A;font-weight:800;border-radius:6px;padding:2px 7px}
+  .rc{background:#FF9AA2}.rsc{background:#9AB8FF}.rt{background:#8FD3A8}
+  .uname{font-weight:750;font-size:.95rem}
+  .items{display:flex;flex-wrap:wrap;gap:6px}
+  .it{font-size:.75rem;border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:#0F1530}
+  .it.bis{border-color:var(--gold);color:var(--gold)}
+  .lbl{font-size:.66rem;color:var(--dim);width:100%;margin-top:2px}
+  /* inputs */
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .field{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .field label{display:block;font-size:.68rem;color:var(--dim);margin-bottom:4px}
+  .row{display:flex;align-items:center;gap:6px}
+  select,input[type=number]{width:100%;background:transparent;border:none;color:var(--txt);
+    font-size:1.1rem;font-weight:650;outline:none;appearance:none;-webkit-appearance:none}
+  .stepper{display:flex;align-items:center;justify-content:space-between;gap:4px}
+  .stepper b{font-size:1.1rem}
+  .sbtn{width:34px;height:34px;flex:none;border-radius:8px;border:1px solid var(--line);
+    background:#101632;color:var(--txt);font-size:1.1rem;line-height:1}
+  .sbtn:active{background:#232e5c}
+  .econ{margin-top:8px;font-size:.78rem;color:var(--dim)}
+  .econ b{color:var(--gold)}
+  /* advice */
+  .adv{border-radius:12px;padding:12px;border:1px solid var(--line);background:#0F1530}
+  .adv .act{font-size:1.05rem;font-weight:800;margin-bottom:4px}
+  .adv.a-lv .act{color:#9AB8FF}.adv.a-roll .act{color:#FF9AA2}.adv.a-save .act{color:#8FD3A8}
+  .adv .why{font-size:.8rem;color:var(--dim);line-height:1.55}
+  /* position board */
+  .bwrap{display:flex;gap:6px;align-items:stretch}
+  .pboard{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cell{aspect-ratio:1/1.05;border-radius:7px;border:1px dashed #202a4c;background:#0D1226;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  .cell.f{border-style:solid;background:#141c3d}
+  .cell .n{font-size:.6rem;font-weight:750;line-height:1.05;text-align:center}
+  .rowlbl{display:flex;flex-direction:column;justify-content:space-between;padding:2px 0}
+  .rowlbl span{font-size:.58rem;color:var(--dim);writing-mode:vertical-rl;letter-spacing:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chip{padding:7px 10px;border-radius:999px;background:#0F1530;border:1px solid var(--line);
+    font-size:.8rem;font-weight:650}
+  footer{max-width:560px;margin:14px auto 0;padding:0 12px}
+  .src{font-size:.64rem;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <h1>TFT s17辅助脚本</h1><span class="ver">v0.4 · 站位与实时数据</span>
+</header>
+
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<script>
+/* =====================================================================
+   阵容库 · 数据来源：
+   [T] tactics.tools Master+ 高分段 · 补丁 17.7 · 抓取 2026-07-17
+   [O] OP.GG 全球统计快照（幻灵线沿用）
+   ※  标注为经验参考（暂无逐件统计数据）
+   站位为常规站位参考，遇刺客/AOE 对局需自行微调
+   ===================================================================== */
+const SRC_NOTE = "出装来源：tactics.tools（Master+ · 17.7 · 抓取 2026-07-17）；幻灵线沿用 OP.GG 快照；带 ※ 的替换件为经验参考。站位为常规参考，遇刺客可把主 C 移到另一侧后角。";
+
+/* 单位 [中文名, 费用]；pos: 名字 -> [行(1=前排), 列(1~7)] */
+const COMPS = [
+{
+  id:"nova_akali", name:"新星阿卡丽", en:"N.O.V.A. Akali & Jax", tier:"T1", tierTxt:"当前榜一",
+  style:"reroll6", styleTxt:"6 级 reroll",
+  stats:"Master+ 平均名次 3.96 · 保四 62.6% · 吃鸡 10.2%（tactics.tools 17.7）",
+  brief:"当前高分段平均名次第一。三星阿卡丽主 C + 三星武器主坦，成型极稳，后期补妖姬/莫甘娜提上限。",
+  roles:{
+    c:{u:"阿卡丽", bis:["海克斯科技枪刃","打击者连枷","死亡之刃"], bsrc:"T",
+       alt:["珠光护手","正义之手","无尽之刃"]},
+    sc:{u:"妖姬", bis:["鬼索的狂暴之刃","珠光护手","巨人杀手"], bsrc:"※",
+       alt:["朔极之矛","灭世者的死亡之帽","虚空之杖"]},
+    tank:{u:"武器", bis:["石像鬼石板甲","圣盾使的誓约","王冠护卫"], bsrc:"T",
+       alt:["狂徒铠甲","荆棘之甲","振奋盔甲"]}
+  },
+  boards:{
+    6:[["剑魔",1],["女警",1],["阿卡丽",2],["武器",2],["茂凯",3],["厄加特",3]],
+    7:[["剑魔",1],["女警",1],["阿卡丽",2],["武器",2],["茂凯",3],["厄加特",3],["妖姬",4]],
+    8:[["剑魔",1],["女警",1],["阿卡丽",2],["武器",2],["茂凯",3],["厄加特",3],["妖姬",4],["莫甘娜",5]],
+    9:[["剑魔",1],["女警",1],["阿卡丽",2],["武器",2],["茂凯",3],["厄加特",3],["妖姬",4],["莫甘娜",5],["塔姆",4]]
+  },
+  pos:{"武器":[1,4],"茂凯":[1,3],"剑魔":[1,5],"塔姆":[1,2],"阿卡丽":[2,4],"厄加特":[3,6],"女警":[4,1],"妖姬":[4,2],"莫甘娜":[4,5]}
+},
+{
+  id:"sg_vex", name:"观星薇古丝", en:"Stargazer Vex & Nunu", tier:"T1", tierTxt:"高吃鸡率",
+  style:"fast8", styleTxt:"fast 8 站 C",
+  stats:"Master+ 平均名次 4.04 · 保四 56.7% · 吃鸡 24.3%（tactics.tools 17.7）",
+  brief:"薇古丝主 C 的上限线：8 级挂满五费（布里茨/男枪/剑姬），吃鸡率全榜最高，打法偏难。",
+  roles:{
+    c:{u:"薇古丝", bis:["红霸符","鬼索的狂暴之刃","灭世者的死亡之帽"], bsrc:"T",
+       alt:["珠光护手","打击者连枷","纳什之牙"]},
+    sc:{u:"男枪", bis:["死亡之刃","水银","巨人杀手"], bsrc:"T",
+       alt:["无尽之刃","最后的轻语","挑战护手"]},
+    tank:{u:"努努", bis:["圣盾使的誓约","狂徒铠甲","适应性头盔"], bsrc:"T",
+       alt:["石像鬼石板甲","荆棘之甲","振奋盔甲"]}
+  },
+  boards:{
+    6:[["剑魔",1],["卡牌",1],["阿卡丽",2],["武器",2],["凯隐",3],["努努",4]],
+    7:[["剑魔",1],["卡牌",1],["阿卡丽",2],["武器",2],["凯隐",3],["茂凯",3],["努努",4]],
+    8:[["剑魔",1],["阿卡丽",2],["凯隐",3],["努努",4],["薇古丝",5],["布里茨",5],["男枪",5],["剑姬",5]],
+    9:[["剑魔",1],["阿卡丽",2],["武器",2],["凯隐",3],["努努",4],["薇古丝",5],["布里茨",5],["男枪",5],["剑姬",5]]
+  },
+  pos:{"布里茨":[1,2],"剑魔":[1,3],"努努":[1,4],"凯隐":[1,5],"剑姬":[1,6],"武器":[2,3],"阿卡丽":[2,4],"卡牌":[4,2],"茂凯":[1,1],"男枪":[3,6],"薇古丝":[4,7]}
+},
+{
+  id:"mecha", name:"机甲龙王", en:"Mecha Aurelion Sol", tier:"T1", tierTxt:"高吃鸡率",
+  style:"fast8", styleTxt:"fast 8 站 C",
+  stats:"Master+ 平均名次 4.13 · 保四 57.3% · 吃鸡 20.7%（tactics.tools 17.7）",
+  brief:"霸天机甲变身扛线、龙王站桩输出。暗星开局过渡顺滑，拿到板甲/机甲相关强化时优先考虑。",
+  roles:{
+    c:{u:"龙王", bis:["珠光护手","灭世者的死亡之帽","大天使之杖"], bsrc:"T",
+       alt:["朔极之矛","纳什之牙","蓝霸符"]},
+    sc:{u:"卡尔玛", bis:["海克斯科技枪刃","红霸符","虚空之杖"], bsrc:"T/※",
+       alt:["鬼索的狂暴之刃","灭世者的死亡之帽","珠光护手"]},
+    tank:{u:"霸天机甲", bis:["离子火花","日炎斗篷","坚定之心"], bsrc:"T",
+       alt:["狂徒铠甲","石像鬼石板甲","荆棘之甲"]}
+  },
+  boards:{
+    6:[["大虫子",1],["丽桑卓",1],["铁男",2],["卡莎",3],["厄加特",3],["龙王",4]],
+    7:[["大虫子",1],["丽桑卓",1],["铁男",2],["卡莎",3],["厄加特",3],["龙王",4],["霸天机甲",4]],
+    8:[["大虫子",1],["丽桑卓",1],["铁男",2],["卡莎",3],["厄加特",3],["龙王",4],["霸天机甲",4],["卡尔玛",4]],
+    9:[["大虫子",1],["丽桑卓",1],["铁男",2],["卡莎",3],["厄加特",3],["龙王",4],["霸天机甲",4],["卡尔玛",4],["塔姆",4]]
+  },
+  pos:{"大虫子":[1,2],"铁男":[1,3],"霸天机甲":[1,4],"塔姆":[1,5],"厄加特":[3,2],"卡莎":[4,2],"丽桑卓":[4,3],"莫甘娜":[3,5],"卡尔玛":[4,5],"龙王":[4,6]}
+},
+{
+  id:"groove", name:"律动莎弥拉", en:"Space Groove Ornn & Samira", tier:"T2", tierTxt:"稳健",
+  style:"reroll7", styleTxt:"7 级 reroll",
+  stats:"Master+ 平均名次 4.23 · 保四 54.2% · 吃鸡 15.3%（tactics.tools 17.7）",
+  brief:"太空律动体系：三星莎弥拉 + 三星奥恩双核，娜美副 C，7 级慢 D 成型后再上巴德/烬。",
+  roles:{
+    c:{u:"莎弥拉", bis:["朔极之矛","无尽之刃","窃贼手套"], bsrc:"T",
+       alt:["死亡之刃","巨人杀手","正义之手"]},
+    sc:{u:"娜美", bis:["纳什之牙","朔极之矛","灭世者的死亡之帽"], bsrc:"T/※",
+       alt:["珠光护手","蓝霸符","莫雷洛秘典"]},
+    tank:{u:"奥恩", bis:["狂徒铠甲","石像鬼石板甲","坚定之心"], bsrc:"T",
+       alt:["日炎斗篷","荆棘之甲","振奋盔甲"]}
+  },
+  boards:{
+    6:[["狗头",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["娜美",4]],
+    7:[["狗头",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["娜美",4],["巴德",5]],
+    8:[["狗头",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["娜美",4],["巴德",5],["烬",5]],
+    9:[["狗头",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["娜美",4],["巴德",5],["烬",5],["塔姆",4]]
+  },
+  pos:{"狗头":[1,3],"茂凯":[1,4],"奥恩":[1,5],"塔姆":[1,6],"莎弥拉":[3,7],"佐伊":[4,3],"巴德":[4,4],"娜美":[4,5],"烬":[4,1]}
+},
+{
+  id:"prim", name:"海魔人金克丝", en:"Primordian Jinx & Bel'Veth", tier:"T2", tierTxt:"稳健",
+  style:"reroll6", styleTxt:"6 级 reroll",
+  stats:"Master+ 平均名次 4.33 · 保四 55.5% · 吃鸡 6.9%（tactics.tools 17.7）",
+  brief:"海魔人虫群蹭伤保排名：三星金克丝主 C、卑尔维斯副 C，成型稳但吃鸡率低，适合混分。",
+  roles:{
+    c:{u:"金克丝", bis:["死亡之刃","海克斯科技枪刃","红霸符"], bsrc:"T",
+       alt:["鬼索的狂暴之刃","无尽之刃","巨人杀手"]},
+    sc:{u:"卑尔维斯", bis:["克拉肯之怒","水银","巨人杀手"], bsrc:"T",
+       alt:["红霸符","泰坦的坚决","挑战护手"]},
+    tank:{u:"挖掘机", bis:["圣盾使的誓约","暮圭","狂徒铠甲"], bsrc:"T/※",
+       alt:["石像鬼石板甲","荆棘之甲","振奋盔甲"]}
+  },
+  boards:{
+    6:[["挖掘机",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3]],
+    7:[["挖掘机",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3],["格温",2]],
+    8:[["挖掘机",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3],["格温",2],["凯隐",3]],
+    9:[["挖掘机",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3],["格温",2],["凯隐",3],["塔姆",4]]
+  },
+  pos:{"塔姆":[1,2],"茂凯":[1,3],"挖掘机":[1,4],"贝蕾亚":[1,5],"卑尔维斯":[1,6],"阿卡丽":[2,4],"格温":[2,5],"凯隐":[2,6],"金克丝":[4,7]}
+},
+{
+  id:"anima", name:"幻灵皎月", en:"Anima Diana", tier:"COLD", tierTxt:"冷门 · 连败特化",
+  style:"anima", styleTxt:"连败叠层 cash-out",
+  stats:"OP.GG 快照：平均名次 3.04 · 保四 78.1% · 一血 27.9%（低登场率）",
+  brief:"S17 连败兑现线（应你之前的需求保留）：前期故意连败叠 Tech，奔 300~400 大额兑现后一波接管。要求 2-1 就有幻灵开局。",
+  roles:{
+    c:{u:"皎月", bis:["饮血剑","鬼索的狂暴之刃","泰坦的坚决"], bsrc:"O",
+       alt:["挑战护手","正义之手","巨人杀手"]},
+    sc:{u:"阿萝拉", bis:["珠光护手","纳什之牙","朔极之矛"], bsrc:"O",
+       alt:["灭世者的死亡之帽","蓝霸符","莫雷洛秘典"]},
+    tank:{u:"俄洛伊", bis:["石像鬼石板甲","狂徒铠甲","振奋盔甲"], bsrc:"O/※",
+       alt:["荆棘之甲","离子火花","适应性头盔"]}
+  },
+  boards:{
+    6:[["蕾欧娜",1],["金克丝",2],["小木灵",2],["阿萝拉",3],["皎月",3],["俄洛伊",3]],
+    7:[["蕾欧娜",1],["金克丝",2],["小木灵",2],["阿萝拉",3],["皎月",3],["俄洛伊",3],["凯隐",3]],
+    8:[["蕾欧娜",1],["金克丝",2],["小木灵",2],["阿萝拉",3],["皎月",3],["俄洛伊",3],["凯隐",3],["妖姬",4]],
+    9:[["蕾欧娜",1],["金克丝",2],["小木灵",2],["阿萝拉",3],["皎月",3],["俄洛伊",3],["凯隐",3],["妖姬",4],["卡尔玛",4]]
+  },
+  pos:{"蕾欧娜":[1,3],"俄洛伊":[1,4],"凯隐":[1,5],"皎月":[2,4],"妖姬":[4,3],"小木灵":[4,4],"卡尔玛":[4,5],"阿萝拉":[4,6],"金克丝":[4,7]},
+  note:"打法要点：摆『会输但能蹭击杀』的板子——输出装集中给一个单位、全队抱团集火，边保血边多攒层。"
+}
+];
+
+/* ================= 存储 ================= */
+function makeStore(){
+  try{ const t="__t"; localStorage.setItem(t,"1"); localStorage.removeItem(t);
+    return {get:k=>localStorage.getItem(k), set:(k,v)=>localStorage.setItem(k,v), del:k=>localStorage.removeItem(k)};
+  }catch(e){ const m={}; return {get:k=>(k in m?m[k]:null), set:(k,v)=>{m[k]=v}, del:k=>{delete m[k]}}; }
+}
+const store = makeStore(); const KEY="tft17_v04";
+function defaultState(){ return {comp:null, level:4, stage:2, round:1, gold:0}; }
+let S = (function(){ try{const r=store.get(KEY); if(r) return Object.assign(defaultState(), JSON.parse(r));}catch(e){} return defaultState(); })();
+function save(){ try{ store.set(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ================= 每级最优阵容 ================= */
+/* 6 级及以上用库中数据；3~5 级自动取 6 级板中费用最低的 N 个（不会出现高费卡） */
+function boardFor(comp, lv){
+  if(lv>=6){
+    const keys=Object.keys(comp.boards).map(Number).sort((a,b)=>a-b);
+    let pick=keys[0];
+    for(const k of keys){ if(lv>=k) pick=k; }
+    return {ref:pick, list:comp.boards[pick], derived:false};
+  }
+  const n=Math.max(2, lv);
+  const list=[...comp.boards[6]].sort((a,b)=>a[1]-b[1]).slice(0,n);
+  return {ref:6, list, derived:true};
+}
+
+/* ================= 建议引擎（标准节奏：2-1升4 / 2-5升5 / 3-2升6 / 4-1升7 / 4-2升8 / 5-2升9） ================= */
+const CURVE = [[2,1,4],[2,5,5],[3,2,6],[4,1,7],[4,2,8],[5,2,9]];
+function curveTarget(st,rd){
+  let t=3;
+  for(const [s,r,lv] of CURVE){ if(st>s || (st===s && rd>=r)) t=lv; }
+  return t;
+}
+function advise(comp, L, st, rd, G){
+  const t = curveTarget(st,rd);
+  if(comp.style==="anima"){
+    if(st<=3) return {k:"save", act:"存钱 · 保持连败", why:"幻灵线 2~3 阶段的任务是叠 Tech 和滚利息：不升级、不 D 牌，金币尽快滚到 50 吃满档利息，商店只顺手拿核心对子。"};
+    if(st===4 && rd<=2) return {k:"roll", act:"升级到 7 并 D 牌", why:"兑现窗口：4-1 / 4-2 升 7 一波 D 出主力两星，穿上 Anima 武器直接接管，四阶段目标近乎全胜。"};
+    if(L<8 && (st>4 || rd>=5)) return {k:"lv", act:"升级到 8", why:"兑现后转入正常节奏：补 8 级上强度，守住赢回来的血量。"};
+  }
+  if(comp.style==="reroll6"){
+    if(L<Math.min(t,6)) return {k:"lv", act:"升级到 "+Math.min(t,6), why:"先按基线节奏走到 6（2-1 升4 / 2-5 升5 / 3-2 升6），这套在 6 级闭环慢 D。"};
+    if(L>=6 && st>=5 && G>=58) return {k:"lv", act:"升级到 7 提上限", why:"三星主力基本到手后，5 阶段起用多余的钱上 7 补四费/五费副 C。"};
+    if(L>=6 && G>50) return {k:"roll", act:"D 牌（D 到剩 50 停）", why:"6 级慢 D 期：每回合只 D 超过 50 的部分，保住满档利息，直到主 C 三星。"};
+    return {k:"save", act:"什么都不做 · 存钱", why:"金币未过 50：先滚利息，到 51+ 再开始慢 D。"};
+  }
+  if(comp.style==="reroll7"){
+    if(L<Math.min(t,7)) return {k:"lv", act:"升级到 "+Math.min(t,7), why:"reroll 线同样按基线走到 7（4-1 到 7 级），到位后才开始慢 D。"};
+    if(L>=7 && st>=5 && rd>=2 && G>=66) return {k:"lv", act:"升级到 8 提上限", why:"三星成型或 5 阶段过半后，把多余经济转成 8 级和高费卡，避免被后期阵容压强度。"};
+    if(L>=7 && G>50) return {k:"roll", act:"D 牌（D 到剩 50 停）", why:"7 级慢 D 期：每回合只 D 超过 50 的部分，滚满利息追三星。"};
+    return {k:"save", act:"什么都不做 · 存钱", why:"金币未过 50：先存，51+ 再慢 D。"};
+  }
+  if(L < t) return {k:"lv", act:"升级到 "+t, why:"按标准节奏当前应到 "+t+" 级（2-1 升4 / 2-5 升5 / 3-2 升6 / 4-1 升7 / 4-2 升8 / 5-2 升9），经济够就直接买经验。"};
+  if(L===8 && G>=50 && (st>4 || (st===4 && rd>=2))) return {k:"roll", act:"D 牌找主力两星（可 D 到剩 30）", why:"8 级站 C 阵容的强度窗口在四阶段：先 D 出主 C / 主坦两星，稳住血量再考虑存 9。"};
+  if(L===8 && st>=5 && G>=66) return {k:"lv", act:"升级到 9 补上限", why:"四阶段站稳后，5-2 起把经济转成 9 级，加入更多高费卡。"};
+  if(L>=9 && G>20) return {k:"roll", act:"D 牌成型", why:"已到 9：把钱换成高费两星，保留 10~20 金机动。"};
+  return {k:"save", act:"什么都不做 · 存钱", why:"等级已跟上节奏、金币未到动手档位：保留经济等下一个决策点。"};
+}
+
+/* ================= 渲染 ================= */
+const app=document.getElementById("app"), foot=document.getElementById("foot");
+
+function renderSelect(){
+  app.innerHTML=""; foot.innerHTML="";
+  const sec=document.createElement("section");
+  const h=document.createElement("h2"); h.textContent="选择本局阵容（可随时更换）· 按当前强度排序";
+  sec.appendChild(h);
+  COMPS.forEach(c=>{
+    const b=document.createElement("button"); b.className="card";
+    const top=document.createElement("div"); top.className="top";
+    const t=document.createElement("span"); t.className="tier "+c.tier; t.textContent=c.tierTxt;
+    const n=document.createElement("span"); n.className="nm"; n.textContent=c.name;
+    const g=document.createElement("span"); g.className="tag"; g.textContent=c.styleTxt;
+    top.append(t,n,g);
+    const m=document.createElement("div"); m.className="mini"; m.textContent=c.brief;
+    const st=document.createElement("div"); st.className="stats"; st.textContent=c.stats;
+    b.append(top,m,st);
+    b.onclick=()=>{ S.comp=c.id; save(); render(); window.scrollTo(0,0); };
+    sec.appendChild(b);
+  });
+  app.appendChild(sec);
+  srcLine();
+}
+
+function roleBlock(cls,label,r){
+  const d=document.createElement("div"); d.className="role";
+  const rh=document.createElement("div"); rh.className="rh";
+  const tag=document.createElement("span"); tag.className="rname "+cls; tag.textContent=label;
+  const u=document.createElement("span"); u.className="uname"; u.textContent=r.u;
+  const s=document.createElement("span"); s.className="mini"; s.textContent="来源 "+r.bsrc;
+  rh.append(tag,u,s);
+  const its=document.createElement("div"); its.className="items";
+  r.bis.forEach(x=>{ const sp=document.createElement("span"); sp.className="it bis"; sp.textContent=x; its.appendChild(sp); });
+  const l1=document.createElement("div"); l1.className="lbl"; l1.textContent="可替换（※ 经验参考）：";
+  its.appendChild(l1);
+  r.alt.forEach(x=>{ const sp=document.createElement("span"); sp.className="it"; sp.textContent=x; its.appendChild(sp); });
+  d.append(rh,its);
+  return d;
+}
+
+function renderMain(){
+  const comp=COMPS.find(c=>c.id===S.comp);
+  if(!comp){ renderSelect(); return; }
+  app.innerHTML=""; foot.innerHTML="";
+
+  /* 顶部：出装 */
+  const s1=document.createElement("section");
+  const h1=document.createElement("h2"); h1.textContent=comp.name+" · 推荐出装（金框为最优）";
+  s1.appendChild(h1);
+  s1.appendChild(roleBlock("rc","主C",comp.roles.c));
+  s1.appendChild(roleBlock("rsc","副C",comp.roles.sc));
+  s1.appendChild(roleBlock("rt","主坦",comp.roles.tank));
+  const srcn=document.createElement("div"); srcn.className="mini"; srcn.textContent=SRC_NOTE;
+  s1.appendChild(srcn);
+  if(comp.note){ const nn=document.createElement("div"); nn.className="mini"; nn.style.marginTop="6px"; nn.textContent=comp.note; s1.appendChild(nn); }
+  app.appendChild(s1);
+
+  /* 状态输入 */
+  const s2=document.createElement("section");
+  const h2t=document.createElement("h2"); h2t.textContent="当前状态";
+  s2.appendChild(h2t);
+  const grid=document.createElement("div"); grid.className="grid";
+  const f1=document.createElement("div"); f1.className="field"; f1.innerHTML='<label>等级</label>';
+  const st1=document.createElement("div"); st1.className="stepper";
+  const m1=mkBtn("−",()=>{S.level=Math.max(2,S.level-1);save();render();});
+  const v1=document.createElement("b"); v1.textContent=S.level;
+  const p1=mkBtn("＋",()=>{S.level=Math.min(10,S.level+1);save();render();});
+  st1.append(m1,v1,p1); f1.appendChild(st1);
+  const f2=document.createElement("div"); f2.className="field"; f2.innerHTML='<label>回合</label>';
+  const rw=document.createElement("div"); rw.className="row";
+  const se1=mkSel(1,7,S.stage,v=>{S.stage=v;save();render();});
+  const dash=document.createElement("span"); dash.style.color="var(--dim)"; dash.textContent="-";
+  const se2=mkSel(1,7,S.round,v=>{S.round=v;save();render();});
+  rw.append(se1,dash,se2); f2.appendChild(rw);
+  const f3=document.createElement("div"); f3.className="field"; f3.innerHTML='<label>金币</label>';
+  const gi=document.createElement("input"); gi.type="number"; gi.inputMode="numeric"; gi.min=0; gi.max=200; gi.value=S.gold;
+  gi.oninput=e=>{S.gold=Math.max(0,+e.target.value||0);save();renderAdvice(comp);renderEconLine();};
+  f3.appendChild(gi);
+  grid.append(f1,f2,f3); s2.appendChild(grid);
+  const ec=document.createElement("div"); ec.className="econ"; ec.id="econline"; s2.appendChild(ec);
+  app.appendChild(s2);
+
+  /* 建议 */
+  const s3=document.createElement("section");
+  const h3=document.createElement("h2"); h3.textContent="本回合建议";
+  s3.appendChild(h3);
+  const advBox=document.createElement("div"); advBox.id="advbox"; s3.appendChild(advBox);
+  app.appendChild(s3);
+
+  /* 最优阵容 + 站位 */
+  const s4=document.createElement("section");
+  const h4=document.createElement("h2"); h4.id="bdtitle"; s4.appendChild(h4);
+  const wrap=document.createElement("div"); wrap.className="bwrap";
+  const pb=document.createElement("div"); pb.className="pboard"; pb.id="pboard";
+  const rl=document.createElement("div"); rl.className="rowlbl";
+  const r1=document.createElement("span"); r1.textContent="前排·敌方";
+  const r2=document.createElement("span"); r2.textContent="后排·我方";
+  rl.append(r1,r2);
+  wrap.append(pb,rl); s4.appendChild(wrap);
+  const chips=document.createElement("div"); chips.className="chips"; chips.id="bdchips"; s4.appendChild(chips);
+  const bh=document.createElement("div"); bh.className="mini"; bh.id="bdhint"; bh.style.marginTop="8px"; s4.appendChild(bh);
+  app.appendChild(s4);
+
+  /* 底部：重选 */
+  const rb=document.createElement("button"); rb.className="btn"; rb.textContent="重新选择阵容（变阵 / 有同行时转线）";
+  rb.onclick=()=>{ S.comp=null; save(); renderSelect(); window.scrollTo(0,0); };
+  foot.appendChild(rb);
+  srcLine();
+
+  renderEconLine(); renderAdvice(comp); renderBoardMap(comp);
+}
+
+function renderEconLine(){
+  const el=document.getElementById("econline"); if(!el) return;
+  const it=Math.min(5,Math.floor(S.gold/10));
+  let t="利息：+"+it+" / 回合";
+  if(S.gold<50){ const nx=(Math.floor(S.gold/10)+1)*10; t+="　·　距下一档（"+nx+"金）差 "+(nx-S.gold)+" 金"; }
+  else t+="　·　已满档";
+  el.textContent=t;
+}
+function renderAdvice(comp){
+  const box=document.getElementById("advbox"); if(!box) return;
+  const a=advise(comp,S.level,S.stage,S.round,S.gold);
+  box.innerHTML="";
+  const d=document.createElement("div"); d.className="adv a-"+(a.k==="lv"?"lv":a.k==="roll"?"roll":"save");
+  const t1=document.createElement("div"); t1.className="act"; t1.textContent=a.act;
+  const t2=document.createElement("div"); t2.className="why"; t2.textContent=a.why;
+  d.append(t1,t2); box.appendChild(d);
+}
+const SHORT={"阿卡丽":"阿卡","厄加特":"厄加","莫甘娜":"莫甘","布里茨":"布里","薇古丝":"薇古","卡尔玛":"卡尔","大虫子":"虫子","丽桑卓":"丽桑","霸天机甲":"机甲","莎弥拉":"莎弥","挖掘机":"掘机","贝蕾亚":"蕾亚","卑尔维斯":"卑尔","金克丝":"金克","小木灵":"木灵","阿萝拉":"萝拉","俄洛伊":"俄洛","蕾欧娜":"蕾欧"};
+function renderBoardMap(comp){
+  const title=document.getElementById("bdtitle"), pb=document.getElementById("pboard"),
+        chips=document.getElementById("bdchips"), hint=document.getElementById("bdhint");
+  const b=boardFor(comp,S.level);
+  title.textContent=S.level+" 级最优阵容与站位（"+b.list.length+" 人口）";
+  /* 站位网格 */
+  pb.innerHTML="";
+  const has={}; b.list.forEach(([n,c])=>{ has[n]=c; });
+  for(let r=1;r<=4;r++){
+    for(let c=1;c<=7;c++){
+      const cell=document.createElement("div"); cell.className="cell";
+      pb.appendChild(cell);
+      for(const [n,cost] of b.list){
+        const p=comp.pos[n];
+        if(p && p[0]===r && p[1]===c){
+          cell.classList.add("f");
+          cell.style.borderColor="var(--c"+cost+")";
+          const t=document.createElement("div"); t.className="n"; t.textContent=SHORT[n]||n;
+          cell.appendChild(t);
+          break;
+        }
+      }
+    }
+  }
+  /* 名单 */
+  chips.innerHTML="";
+  b.list.forEach(([n,c])=>{
+    const s=document.createElement("span"); s.className="chip";
+    s.style.borderColor="var(--c"+c+")"; s.textContent=n;
+    chips.appendChild(s);
+  });
+  hint.textContent = b.derived
+    ? "6 级前为过渡期：显示的是最终阵容中费用最低的 "+b.list.length+" 个核心（自动生成，不含高费卡）；有任意能两星的强牌可临时顶替。"
+    : "第 1 行为前排（贴敌方），第 4 行为后排。能不能 D 到不用管，缺谁 D 谁；遇刺客把主 C 换到另一侧后角。";
+}
+function mkBtn(t,fn){ const b=document.createElement("button"); b.className="sbtn"; b.textContent=t; b.onclick=fn; return b; }
+function mkSel(from,to,val,fn){
+  const s=document.createElement("select");
+  for(let i=from;i<=to;i++){const o=document.createElement("option");o.value=i;o.textContent=i;s.appendChild(o);}
+  s.value=val; s.onchange=e=>fn(+e.target.value); return s;
+}
+function srcLine(){
+  const d=document.createElement("div"); d.className="src";
+  d.textContent="阵容 / 出装：tactics.tools Master+ 高分段 · 补丁 17.7 · 抓取 2026-07-17（幻灵线为 OP.GG 快照）· 站位为常规参考 · JP/SEA 分区数据 v0.5 接入";
+  foot.appendChild(d);
+}
+function render(){ S.comp ? renderMain() : renderSelect(); }
+render();
+</script>
+</body>
+</html>
