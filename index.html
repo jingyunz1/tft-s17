@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TFT s17辅助脚本</title>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background:
+      radial-gradient(1100px 700px at 72% 18%, #1B2246 0%, #0B0E1A 55%, #06070F 100%);
+    color: #F2F4FF;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+      "Hiragino Sans GB", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1.2px 1.2px at 12% 22%, rgba(255,255,255,.75), transparent 60%),
+      radial-gradient(1px 1px at 79% 31%, rgba(255,255,255,.55), transparent 60%),
+      radial-gradient(1.4px 1.4px at 33% 74%, rgba(255,255,255,.6), transparent 60%),
+      radial-gradient(1px 1px at 58% 12%, rgba(255,255,255,.45), transparent 60%),
+      radial-gradient(1px 1px at 88% 68%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(1.2px 1.2px at 21% 52%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1px 1px at 46% 38%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(1.3px 1.3px at 67% 84%, rgba(255,255,255,.55), transparent 60%);
+  }
+  h1 {
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    font-weight: 650;
+    letter-spacing: .08em;
+    text-align: center;
+    padding: 0 24px;
+    text-shadow: 0 0 28px rgba(122, 144, 255, .35);
+  }
+</style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+  <h1>TFT s17辅助脚本</h1>
+</body>
+</html>
