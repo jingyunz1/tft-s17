@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TFT s17辅助脚本</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0B0E1A; --panel:#131A30; --panel2:#1A2240; --line:#26304F;
+    --txt:#F2F4FF; --dim:#8A93B5;
+    --c1:#9AA4AF; --c2:#4CAF6E; --c3:#4C8FE0; --c4:#B45BE6; --c5:#E3A93F;
+    --acc:#7A90FF; --gold:#E3A93F;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    min-height:100%;
+    background: radial-gradient(1100px 700px at 72% -10%, #1B2246 0%, var(--bg) 55%, #06070F 100%) fixed;
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Segoe UI",sans-serif;
+    padding-bottom:40px;
+  }
+  header{padding:16px 16px 8px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  header h1{font-size:1.2rem;letter-spacing:.06em;text-shadow:0 0 20px rgba(122,144,255,.35)}
+  header .ver{font-size:.7rem;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  main{padding:0 12px;display:flex;flex-direction:column;gap:12px;max-width:560px;margin:0 auto}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+  section h2{font-size:.8rem;color:var(--dim);font-weight:600;letter-spacing:.12em;margin-bottom:10px}
+  .mini{font-size:.74rem;color:var(--dim);line-height:1.55}
+  .btn{width:100%;padding:12px 0;border-radius:10px;border:1px solid var(--line);
+    background:#101632;color:var(--txt);font-size:.92rem;font-weight:600}
+  .btn:active{background:#232e5c}
+  .card{width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:12px;margin-bottom:10px;color:var(--txt)}
+  .card:active{background:#232e5c}
+  .card .top{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .card .nm{font-size:1rem;font-weight:700}
+  .tier{font-size:.68rem;font-weight:800;border-radius:6px;padding:2px 7px;color:#0B0E1A}
+  .tier.T1{background:#FF6B81}.tier.T2{background:var(--gold)}.tier.COLD{background:#7C86A8}
+  .tag{font-size:.66rem;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .stats{font-size:.7rem;color:var(--dim);margin-top:4px}
+  .role{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px}
+  .role .rh{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .rname{font-size:.72rem;color:#0B0E1A;font-weight:800;border-radius:6px;padding:2px 7px}
+  .rc{background:#FF9AA2}.rsc{background:#9AB8FF}.rt{background:#8FD3A8}
+  .uname{font-weight:750;font-size:.95rem}
+  .items{display:flex;flex-wrap:wrap;gap:6px}
+  .it{font-size:.75rem;border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:#0F1530}
+  .it.bis{border-color:var(--gold);color:var(--gold)}
+  .lbl{font-size:.66rem;color:var(--dim);width:100%;margin-top:2px}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .field{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .field label{display:block;font-size:.68rem;color:var(--dim);margin-bottom:4px}
+  .row{display:flex;align-items:center;gap:6px}
+  select,input[type=number]{width:100%;background:transparent;border:none;color:var(--txt);
+    font-size:1.1rem;font-weight:650;outline:none;appearance:none;-webkit-appearance:none}
+  .stepper{display:flex;align-items:center;justify-content:space-between;gap:4px}
+  .stepper b{font-size:1.1rem}
+  .sbtn{width:34px;height:34px;flex:none;border-radius:8px;border:1px solid var(--line);
+    background:#101632;color:var(--txt);font-size:1.1rem;line-height:1}
+  .sbtn:active{background:#232e5c}
+  .econ{margin-top:8px;font-size:.78rem;color:var(--dim)}
+  .econ b{color:var(--gold)}
+  .adv{border-radius:12px;padding:12px;border:1px solid var(--line);background:#0F1530}
+  .adv .act{font-size:1.05rem;font-weight:800;margin-bottom:4px}
+  .adv.a-lv .act{color:#9AB8FF}.adv.a-roll .act{color:#FF9AA2}.adv.a-save .act{color:#8FD3A8}
+  .adv .why{font-size:.8rem;color:var(--dim);line-height:1.55}
+  .bwrap{display:flex;gap:6px;align-items:stretch}
+  .pboard{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cell{aspect-ratio:1/1.05;border-radius:7px;border:1px dashed #202a4c;background:#0D1226;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  .cell.f{border-style:solid;background:#141c3d}
+  .cell .n{font-size:.6rem;font-weight:750;line-height:1.05;text-align:center}
+  .rowlbl{display:flex;flex-direction:column;justify-content:space-between;padding:2px 0}
+  .rowlbl span{font-size:.58rem;color:var(--dim);writing-mode:vertical-rl;letter-spacing:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chip{padding:7px 10px;border-radius:999px;background:#0F1530;border:1px solid var(--line);
+    font-size:.8rem;font-weight:650}
+  footer{max-width:560px;margin:14px auto 0;padding:0 12px}
+  .src{font-size:.64rem;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <h1>TFT s17辅助脚本</h1><span class="ver">v0.7 · 阵容脚本重做</span>
+  <span style="flex:1"></span>
+  <button id="navApp" class="tag" style="background:#26315f;color:var(--txt)">助手</button>
+  <button id="navDB" class="tag" style="color:var(--dim)">数据库·核对</button>
+</header>
+
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<script>
+/* =====================================================================
+   数据来源：
+   [T] tactics.tools Master+ · 17.7        [O] OP.GG 实时页（截图核对）
+   [F] tftflow / metabot / Mobalytics 17.7  ※ 经验参考（无逐件统计）
+   棋子名使用游戏官方中文译名
+   ===================================================================== */
+const SRC_NOTE = "出装来源标注：T = tactics.tools（Master+ · 17.7）· O = OP.GG 实时页 · F = tftflow / metabot / Mobalytics（17.7）· ※ = 经验参考。同名装备可叠多件（如贾克斯双石像鬼）。站位为常规参考，遇刺客可把主 C 移到另一侧后角。";
+const TRANS_NOTE = "前期不必死守本阵容：血量和利息优先。常见过渡包——海魔人（雷克塞+贝蕾亚+卑尔维斯，3 海魔人每回合白嫖一张 1/2 费）、法官（蕾欧娜+佐伊+黛安娜）、未来战士（伊泽瑞尔+米利欧+潘森，连败白嫖刷新），或任意已两星的质量卡，3-2 前后再转回本阵容。";
+
+const COMPS = [
+{
+  id:"nova_akali", name:"新星阿卡丽", en:"N.O.V.A. Akali & Jax", tier:"T1", tierTxt:"当前榜一",
+  style:"reroll6", styleTxt:"6 级 reroll",
+  stats:"OP.GG 实时：平均名次 3.69 · 一血 16.7% · 保四 66.57% · 登场 2.2%（OP 级）",
+  brief:"当前榜一。三星阿卡丽主 C + 三星贾克斯主坦，千珏副 C，8 级补莫甘娜成型。新星五人组：亚托克斯 / 凯特琳 / 阿卡丽 / 茂凯 / 千珏。",
+  roles:{
+    c:{u:"阿卡丽", bis:["海克斯科技枪刃","打击者连枷","死亡之刃"], bsrc:"T",
+       alt:["珠光护手","正义之手","无尽之刃"]},
+    sc:{u:"千珏", bis:["鬼索的狂暴之刃","红霸符","巨人杀手"], bsrc:"O ※待确认",
+       alt:["死亡之刃","无尽之刃","收集者"]},
+    tank:{u:"贾克斯", bis:["王冠护卫","石像鬼石板甲","石像鬼石板甲"], bsrc:"O",
+       alt:["狂徒铠甲","圣盾使的誓约","振奋盔甲"]}
+  },
+  opener:{units:[["亚托克斯",1],["凯特琳",1],["阿卡丽",2],["贾克斯",2],["茂凯",3]],
+          note:"新星自然开：亚托克斯+凯特琳+阿卡丽即 3 新星，贾克斯前排"},
+  boards:{
+    6:[["亚托克斯",1],["凯特琳",1],["阿卡丽",2],["贾克斯",2],["茂凯",3],["厄加特",3]],
+    7:[["亚托克斯",1],["凯特琳",1],["阿卡丽",2],["贾克斯",2],["茂凯",3],["厄加特",3],["千珏",4]],
+    8:[["亚托克斯",1],["凯特琳",1],["阿卡丽",2],["贾克斯",2],["茂凯",3],["厄加特",3],["千珏",4],["莫甘娜",4]]
+  },
+  pos:{"贾克斯":[1,4],"千珏":[4,1],"阿卡丽":[4,2],"亚托克斯":[4,3],"茂凯":[4,4],"莫甘娜":[4,5],"厄加特":[4,6],"凯特琳":[4,7]},
+  note:"站位要点（OP.GG 实时页）：只有贾克斯一人站前排中央，其余全员龟缩最后一排（阿卡丽也在后排）。"
+},
+{
+  id:"sg_vex", name:"观星薇古丝", en:"Stargazer Vex & Nunu", tier:"T1", tierTxt:"高吃鸡率",
+  style:"fast8", styleTxt:"fast 8 站 C",
+  stats:"Master+ 平均名次 4.04 · 保四 56.7% · 吃鸡 24.3%（tactics.tools 17.7）",
+  brief:"薇古丝主 C 的上限线：8 级挂满五费（布里茨/格雷福斯/菲奥娜），吃鸡率全榜最高，打法偏难。",
+  roles:{
+    c:{u:"薇古丝", bis:["红霸符","鬼索的狂暴之刃","灭世者的死亡之帽"], bsrc:"T",
+       alt:["珠光护手","打击者连枷","纳什之牙"]},
+    sc:{u:"格雷福斯", bis:["死亡之刃","水银","巨人杀手"], bsrc:"T",
+       alt:["无尽之刃","最后的轻语","挑战护手"]},
+    tank:{u:"努努和威朗普", bis:["圣盾使的誓约","狂徒铠甲","适应性头盔"], bsrc:"T",
+       alt:["石像鬼石板甲","荆棘之甲","振奋盔甲"]}
+  },
+  opener:{units:[["亚托克斯",1],["阿卡丽",2],["茂凯",3],["贾克斯",2],["崔斯特",1]],
+          note:"新星 + 观星过渡：亚托克斯+阿卡丽+茂凯凑 3 新星，贾克斯/崔斯特补观星件"},
+  boards:{
+    6:[["亚托克斯",1],["崔斯特",1],["阿卡丽",2],["贾克斯",2],["拉亚斯特",3],["茂凯",3]],
+    7:[["亚托克斯",1],["崔斯特",1],["阿卡丽",2],["贾克斯",2],["拉亚斯特",3],["茂凯",3],["努努和威朗普",4]],
+    8:[["亚托克斯",1],["阿卡丽",2],["拉亚斯特",3],["努努和威朗普",4],["薇古丝",5],["布里茨",5],["格雷福斯",5],["菲奥娜",5]]
+  },
+  pos:{"茂凯":[1,1],"布里茨":[1,2],"亚托克斯":[1,3],"努努和威朗普":[1,4],"拉亚斯特":[1,5],"菲奥娜":[1,6],"贾克斯":[2,3],"阿卡丽":[2,4],"崔斯特":[4,2],"格雷福斯":[3,6],"薇古丝":[4,7]}
+},
+{
+  id:"mecha", name:"机甲龙王", en:"Mecha Aurelion Sol", tier:"T1", tierTxt:"高吃鸡率",
+  style:"fast8", styleTxt:"fast 8 站 C",
+  stats:"Master+ 平均名次 4.13 · 保四 57.3% · 吃鸡 20.7%（tactics.tools 17.7）",
+  brief:"超级机甲变身扛线、奥瑞利安·索尔站桩输出。暗星开局过渡顺滑，拿到霸天机甲相关强化时优先考虑。",
+  roles:{
+    c:{u:"奥瑞利安·索尔", bis:["珠光护手","灭世者的死亡之帽","大天使之杖"], bsrc:"T",
+       alt:["朔极之矛","纳什之牙","蓝霸符"]},
+    sc:{u:"卡尔玛", bis:["海克斯科技枪刃","红霸符","虚空之杖"], bsrc:"T/※",
+       alt:["鬼索的狂暴之刃","灭世者的死亡之帽","珠光护手"]},
+    tank:{u:"超级机甲", bis:["离子火花","日炎斗篷","坚定之心"], bsrc:"T",
+       alt:["狂徒铠甲","石像鬼石板甲","荆棘之甲"]}
+  },
+  opener:{units:[["科加斯",1],["丽桑卓",1],["莫德凯撒",2],["卡莎",3],["厄加特",3]],
+          note:"暗星开：科加斯+丽桑卓+莫德凯撒+卡莎（暗星四件套）"},
+  boards:{
+    6:[["科加斯",1],["丽桑卓",1],["莫德凯撒",2],["卡莎",3],["厄加特",3],["古拉加斯",2]],
+    7:[["科加斯",1],["丽桑卓",1],["莫德凯撒",2],["卡莎",3],["厄加特",3],["奥瑞利安·索尔",4],["超级机甲",4]],
+    8:[["科加斯",1],["丽桑卓",1],["莫德凯撒",2],["卡莎",3],["厄加特",3],["奥瑞利安·索尔",4],["超级机甲",4],["卡尔玛",4]]
+  },
+  pos:{"科加斯":[1,2],"莫德凯撒":[1,3],"超级机甲":[1,4],"古拉加斯":[1,5],"厄加特":[3,2],"卡莎":[4,2],"丽桑卓":[4,3],"卡尔玛":[4,5],"奥瑞利安·索尔":[4,6]}
+},
+{
+  id:"meeple", name:"木灵飞机锐雯", en:"Meeple Corki & Riven", tier:"T2", tierTxt:"5 木灵体系",
+  style:"fast8", styleTxt:"fast 8 节奏型",
+  stats:"Mobalytics 17.7 S 级（Astral Meep · 5 木灵）· OP.GG 同系 7 木灵变体：平均 4.25 / 保四 55.6%",
+  brief:"5 木灵成型（小木灵/菲兹/库奇/拉莫斯/巴德）+ 米利欧锐雯双未来战士，高费前排补超级机甲和慎。节奏型——不是 reroll，围绕 3 木灵 + 纳尔强开，保血健康进四阶段。",
+  roles:{
+    c:{u:"库奇", bis:["死亡之刃","最后的轻语","巨人杀手"], bsrc:"O",
+       alt:["无尽之刃","打击者连枷","收集者"]},
+    sc:{u:"锐雯", bis:["饮血剑","夜之锋刃","挑战护手"], bsrc:"O",
+       alt:["巨人杀手","正义之手","窃贼手套"]},
+    tank:{u:"拉莫斯", bis:["荆棘之甲","圣盾使的誓约","坚定之心"], bsrc:"O",
+       alt:["石像鬼石板甲","日炎斗篷","狂徒铠甲"]}
+  },
+  opener:{units:[["波比",1],["维迦",1],["小木灵",2],["纳尔",2],["菲兹",3]],
+          note:"3 木灵 + 纳尔强开（波比/维迦/小木灵即 3 木灵，纳尔当前期 C）"},
+  boards:{
+    6:[["波比",1],["维迦",1],["小木灵",2],["纳尔",2],["菲兹",3],["贾克斯",2]],
+    7:[["波比",1],["小木灵",2],["米利欧",2],["菲兹",3],["库奇",4],["拉莫斯",4],["锐雯",4]],
+    8:[["小木灵",2],["米利欧",2],["菲兹",3],["库奇",4],["拉莫斯",4],["锐雯",4],["超级机甲",4],["巴德",5]],
+    9:[["小木灵",2],["米利欧",2],["菲兹",3],["库奇",4],["拉莫斯",4],["锐雯",4],["超级机甲",4],["巴德",5],["慎",5]]
+  },
+  pos:{"贾克斯":[1,1],"小木灵":[1,2],"波比":[1,3],"拉莫斯":[1,4],"纳尔":[1,5],"超级机甲":[1,6],"慎":[1,7],"锐雯":[2,3],"菲兹":[2,5],"米利欧":[4,3],"巴德":[4,5],"维迦":[4,6],"库奇":[4,7]},
+  note:"要点：库奇自带暴击（织命人），死亡之刃优先、无尽有分歧；拉莫斯 OP.GG 最优＝荆棘/圣盾誓约/坚定之心（技能吃护甲的逻辑不变）；锐雯饮血/夜刃/挑战护手转物理，有木灵纹章优先给她；巴德收尾装莫雷洛/朔极/虚空[O]；9 级上慎——暮光铁壁圣物贴主 C 放。"
+},
+{
+  id:"groove", name:"律动莎弥拉", en:"Space Groove Ornn & Samira", tier:"T2", tierTxt:"稳健",
+  style:"reroll7", styleTxt:"7 级 reroll",
+  stats:"Master+ 平均名次 4.23 · 保四 54.2% · 吃鸡 15.3%（tactics.tools 17.7）",
+  brief:"太空律动体系：三星莎弥拉 + 三星奥恩双核，娜美副 C，7 级慢 D 成型后再上巴德/烬。",
+  roles:{
+    c:{u:"莎弥拉", bis:["朔极之矛","无尽之刃","窃贼手套"], bsrc:"T",
+       alt:["死亡之刃","巨人杀手","正义之手"]},
+    sc:{u:"娜美", bis:["纳什之牙","朔极之矛","灭世者的死亡之帽"], bsrc:"T/※",
+       alt:["珠光护手","蓝霸符","莫雷洛秘典"]},
+    tank:{u:"奥恩", bis:["狂徒铠甲","石像鬼石板甲","坚定之心"], bsrc:"T",
+       alt:["日炎斗篷","荆棘之甲","振奋盔甲"]}
+  },
+  opener:{units:[["内瑟斯",1],["佐伊",2],["莎弥拉",3],["奥恩",3],["茂凯",3]],
+          note:"本阵容低费自然开；开不出也可用海魔人包过渡（见下方过渡原则）"},
+  boards:{
+    6:[["内瑟斯",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["格温",2]],
+    7:[["内瑟斯",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["娜美",4],["巴德",5]],
+    8:[["内瑟斯",1],["佐伊",2],["奥恩",3],["莎弥拉",3],["茂凯",3],["娜美",4],["巴德",5],["烬",5]]
+  },
+  pos:{"内瑟斯":[1,3],"茂凯":[1,4],"奥恩":[1,5],"格温":[2,5],"莎弥拉":[4,7],"佐伊":[4,3],"巴德":[4,4],"娜美":[4,5],"烬":[4,1]}
+},
+{
+  id:"prim", name:"海魔人金克丝", en:"Primordian Jinx & Bel'Veth", tier:"T2", tierTxt:"稳健",
+  style:"reroll6", styleTxt:"6 级 reroll",
+  stats:"Master+ 平均名次 4.33 · 保四 55.5% · 吃鸡 6.9%（tactics.tools 17.7）",
+  brief:"海魔人虫群蹭伤保排名：三星金克丝主 C、卑尔维斯副 C。3 海魔人每回合白嫖一张 1/2 费，前期经济极舒服；成型稳但吃鸡率低。",
+  roles:{
+    c:{u:"金克丝", bis:["死亡之刃","海克斯科技枪刃","红霸符"], bsrc:"T",
+       alt:["鬼索的狂暴之刃","无尽之刃","巨人杀手"]},
+    sc:{u:"卑尔维斯", bis:["克拉肯之怒","水银","巨人杀手"], bsrc:"T",
+       alt:["红霸符","泰坦的坚决","挑战护手"]},
+    tank:{u:"雷克塞", bis:["圣盾使的誓约","暮圭","狂徒铠甲"], bsrc:"T/※",
+       alt:["石像鬼石板甲","荆棘之甲","振奋盔甲"]}
+  },
+  opener:{units:[["雷克塞",1],["贝蕾亚",1],["卑尔维斯",2],["金克丝",2],["阿卡丽",2]],
+          note:"海魔人自然开：雷克塞+贝蕾亚+卑尔维斯即 3 海魔人（每回合白嫖棋子）"},
+  boards:{
+    6:[["雷克塞",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3]],
+    7:[["雷克塞",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3],["格温",2]],
+    8:[["雷克塞",1],["贝蕾亚",1],["金克丝",2],["卑尔维斯",2],["阿卡丽",2],["茂凯",3],["格温",2],["拉亚斯特",3]]
+  },
+  pos:{"茂凯":[1,3],"雷克塞":[1,4],"贝蕾亚":[1,5],"卑尔维斯":[1,6],"阿卡丽":[2,4],"格温":[2,5],"拉亚斯特":[2,6],"金克丝":[4,7]}
+},
+{
+  id:"anima", name:"幻灵黛安娜", en:"Anima Diana", tier:"COLD", tierTxt:"冷门 · 连败特化",
+  style:"anima", styleTxt:"连败叠层 cash-out",
+  stats:"OP.GG 快照：平均名次 3.04 · 保四 78.1% · 一血 27.9%（低登场率）",
+  brief:"S17 连败兑现线（应你的需求保留）。幻灵只有五人：贝蕾亚/金克丝/阿萝拉/俄洛伊/菲奥娜——2-1 必须凑出 3 幻灵（贝蕾亚+金克丝+阿萝拉或俄洛伊）才能开始叠层，否则果断换线。",
+  roles:{
+    c:{u:"黛安娜", bis:["饮血剑","鬼索的狂暴之刃","泰坦的坚决"], bsrc:"O",
+       alt:["挑战护手","正义之手","巨人杀手"]},
+    sc:{u:"阿萝拉", bis:["珠光护手","纳什之牙","朔极之矛"], bsrc:"O",
+       alt:["灭世者的死亡之帽","蓝霸符","莫雷洛秘典"]},
+    tank:{u:"俄洛伊", bis:["石像鬼石板甲","狂徒铠甲","振奋盔甲"], bsrc:"O/※",
+       alt:["荆棘之甲","离子火花","适应性头盔"]}
+  },
+  opener:{units:[["贝蕾亚",1],["金克丝",2],["阿萝拉",3],["蕾欧娜",1],["俄洛伊",3]],
+          note:"幻灵开局（3 幻灵必开）：贝蕾亚+金克丝+阿萝拉/俄洛伊；贝蕾亚站坦克前面蹭击杀层"},
+  boards:{
+    6:[["贝蕾亚",1],["金克丝",2],["阿萝拉",3],["俄洛伊",3],["黛安娜",3],["蕾欧娜",1]],
+    7:[["蕾欧娜",1],["金克丝",2],["小木灵",2],["阿萝拉",3],["俄洛伊",3],["黛安娜",3],["乐芙兰",4]],
+    8:[["蕾欧娜",1],["金克丝",2],["小木灵",2],["阿萝拉",3],["俄洛伊",3],["黛安娜",3],["乐芙兰",4],["拉亚斯特",3]]
+  },
+  pos:{"贝蕾亚":[1,2],"小木灵":[1,2],"蕾欧娜":[1,3],"俄洛伊":[1,4],"拉亚斯特":[1,5],"黛安娜":[2,4],"乐芙兰":[4,3],"阿萝拉":[4,6],"金克丝":[4,7]},
+  note:"打法要点：摆『会输但能蹭击杀』的板子——输出装集中给一个单位、全队抱团集火，边保血边多攒层。7 级起贝蕾亚换小木灵（同站前排）；7 级上乐芙兰＝3 法官＋3 牧羊成型，8 级再补拉亚斯特——此时激活羁绊最多，救世主收益拉满。"
+}
+];
+
+/* ================= 存储 ================= */
+function makeStore(){
+  try{ const t="__t"; localStorage.setItem(t,"1"); localStorage.removeItem(t);
+    return {get:k=>localStorage.getItem(k), set:(k,v)=>localStorage.setItem(k,v), del:k=>localStorage.removeItem(k)};
+  }catch(e){ const m={}; return {get:k=>(k in m?m[k]:null), set:(k,v)=>{m[k]=v}, del:k=>{delete m[k]}}; }
+}
+const store = makeStore(); const KEY="tft17_v05";
+function defaultState(){ return {comp:null, level:4, stage:2, round:1, gold:0, view:"app"}; }
+let S = (function(){ try{const r=store.get(KEY); if(r) return Object.assign(defaultState(), JSON.parse(r));}catch(e){} return defaultState(); })();
+function save(){ try{ store.set(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ================= 每级阵容：≤5 级用开局包，6 级起用统计成型板 ================= */
+function boardFor(comp, lv){
+  if(lv>=6){
+    const keys=Object.keys(comp.boards).map(Number).sort((a,b)=>a-b);
+    let pick=keys[0];
+    for(const k of keys){ if(lv>=k) pick=k; }
+    return {ref:pick, list:comp.boards[pick], mode:"board"};
+  }
+  const n=Math.max(3, lv);
+  return {ref:0, list:comp.opener.units.slice(0,n), mode:"opener"};
+}
+
+/* ================= 建议引擎 ================= */
+const CURVE = [[2,1,4],[2,5,5],[3,2,6],[4,1,7],[4,2,8],[5,2,9]];
+function curveTarget(st,rd){
+  let t=3;
+  for(const [s,r,lv] of CURVE){ if(st>s || (st===s && rd>=r)) t=lv; }
+  return t;
+}
+function advise(comp, L, st, rd, G){
+  const t = curveTarget(st,rd);
+  if(comp.style==="anima"){
+    if(st<=3) return {k:"save", act:"存钱 · 保持连败", why:"幻灵线 2~3 阶段的任务是叠 Tech 和滚利息：不升级、不 D 牌，金币尽快滚到 50 吃满档利息，商店只顺手拿核心对子。前提是场上有 3 幻灵在叠层。"};
+    if(st===4 && rd<=2) return {k:"roll", act:"升级到 7 并 D 牌", why:"兑现窗口：4-1 / 4-2 升 7 一波 D 出主力两星，穿上 Anima 武器直接接管，四阶段目标近乎全胜。"};
+    if(L<8 && (st>4 || rd>=5)) return {k:"lv", act:"升级到 8", why:"兑现后转入正常节奏：补 8 级上强度，守住赢回来的血量。"};
+  }
+  if(comp.style==="reroll6"){
+    if(L<Math.min(t,6)) return {k:"lv", act:"升级到 "+Math.min(t,6), why:"先按基线节奏走到 6（2-1 升4 / 2-5 升5 / 3-2 升6），这套在 6 级闭环慢 D。"};
+    if(L>=6 && st>=5 && G>=58) return {k:"lv", act:"升级到 7 提上限", why:"三星主力基本到手后，5 阶段起用多余的钱上 7 补四费/五费副 C。"};
+    if(L>=6 && G>50) return {k:"roll", act:"D 牌（D 到剩 50 停）", why:"6 级慢 D 期：每回合只 D 超过 50 的部分，保住满档利息，直到主 C 三星。"};
+    return {k:"save", act:"什么都不做 · 存钱", why:"金币未过 50：先滚利息，到 51+ 再开始慢 D。"};
+  }
+  if(comp.style==="reroll7"){
+    if(L<Math.min(t,7)) return {k:"lv", act:"升级到 "+Math.min(t,7), why:"reroll 线同样按基线走到 7（4-1 到 7 级），到位后才开始慢 D。"};
+    if(L>=7 && st>=5 && rd>=2 && G>=66) return {k:"lv", act:"升级到 8 提上限", why:"三星成型或 5 阶段过半后，把多余经济转成 8 级和高费卡，避免被后期阵容压强度。"};
+    if(L>=7 && G>50) return {k:"roll", act:"D 牌（D 到剩 50 停）", why:"7 级慢 D 期：每回合只 D 超过 50 的部分，滚满利息追三星。"};
+    return {k:"save", act:"什么都不做 · 存钱", why:"金币未过 50：先存，51+ 再慢 D。"};
+  }
+  if(L < t) return {k:"lv", act:"升级到 "+t, why:"按标准节奏当前应到 "+t+" 级（2-1 升4 / 2-5 升5 / 3-2 升6 / 4-1 升7 / 4-2 升8 / 5-2 升9），经济够就直接买经验。"};
+  if(L===8 && G>=50 && (st>4 || (st===4 && rd>=2))) return {k:"roll", act:"D 牌找主力两星（可 D 到剩 30）", why:"8 级站 C 阵容的强度窗口在四阶段：先 D 出主 C / 主坦两星，稳住血量再考虑存 9。"};
+  if(L===8 && st>=5 && G>=66) return {k:"lv", act:"升级到 9 补上限", why:"四阶段站稳后，5-2 起把经济转成 9 级，加入更多高费卡。"};
+  if(L>=9 && G>20) return {k:"roll", act:"D 牌成型", why:"已到 9：把钱换成高费两星，保留 10~20 金机动。"};
+  return {k:"save", act:"什么都不做 · 存钱", why:"等级已跟上节奏、金币未到动手档位：保留经济等下一个决策点。"};
+}
+
+/* ================= 渲染 ================= */
+const app=document.getElementById("app"), foot=document.getElementById("foot");
+
+function renderSelect(){
+  app.innerHTML=""; foot.innerHTML="";
+  const sec=document.createElement("section");
+  const h=document.createElement("h2"); h.textContent="选择本局阵容（可随时更换）· 按当前强度排序";
+  sec.appendChild(h);
+  COMPS.forEach(c=>{
+    const b=document.createElement("button"); b.className="card";
+    const top=document.createElement("div"); top.className="top";
+    const t=document.createElement("span"); t.className="tier "+c.tier; t.textContent=c.tierTxt;
+    const n=document.createElement("span"); n.className="nm"; n.textContent=c.name;
+    const g=document.createElement("span"); g.className="tag"; g.textContent=c.styleTxt;
+    top.append(t,n,g);
+    const m=document.createElement("div"); m.className="mini"; m.textContent=c.brief;
+    const st=document.createElement("div"); st.className="stats"; st.textContent=c.stats;
+    b.append(top,m,st);
+    b.onclick=()=>{ S.comp=c.id; save(); render(); window.scrollTo(0,0); };
+    sec.appendChild(b);
+  });
+  app.appendChild(sec);
+  srcLine();
+}
+
+function roleBlock(cls,label,r){
+  const d=document.createElement("div"); d.className="role";
+  const rh=document.createElement("div"); rh.className="rh";
+  const tag=document.createElement("span"); tag.className="rname "+cls; tag.textContent=label;
+  const u=document.createElement("span"); u.className="uname"; u.textContent=r.u;
+  const s=document.createElement("span"); s.className="mini"; s.textContent="来源 "+r.bsrc;
+  rh.append(tag,u,s);
+  const its=document.createElement("div"); its.className="items";
+  r.bis.forEach(x=>{ const sp=document.createElement("span"); sp.className="it bis"; sp.textContent=x; its.appendChild(sp); });
+  const l1=document.createElement("div"); l1.className="lbl"; l1.textContent="可替换（※ 经验参考）：";
+  its.appendChild(l1);
+  r.alt.forEach(x=>{ const sp=document.createElement("span"); sp.className="it"; sp.textContent=x; its.appendChild(sp); });
+  d.append(rh,its);
+  return d;
+}
+
+function renderMain(){
+  const comp=COMPS.find(c=>c.id===S.comp);
+  if(!comp){ renderSelect(); return; }
+  app.innerHTML=""; foot.innerHTML="";
+
+  const back=document.createElement("button"); back.className="btn"; back.style.marginBottom="2px";
+  back.textContent="← 返回阵容选择";
+  back.onclick=()=>{ S.comp=null; save(); renderSelect(); window.scrollTo(0,0); };
+  app.appendChild(back);
+
+  const s1=document.createElement("section");
+  const h1=document.createElement("h2"); h1.textContent=comp.name+" · 推荐出装（金框为最优）";
+  s1.appendChild(h1);
+  s1.appendChild(roleBlock("rc","主C",comp.roles.c));
+  s1.appendChild(roleBlock("rsc","副C",comp.roles.sc));
+  s1.appendChild(roleBlock("rt","主坦",comp.roles.tank));
+  const srcn=document.createElement("div"); srcn.className="mini"; srcn.textContent=SRC_NOTE;
+  s1.appendChild(srcn);
+  if(comp.note){ const nn=document.createElement("div"); nn.className="mini"; nn.style.marginTop="6px"; nn.textContent=comp.note; s1.appendChild(nn); }
+  app.appendChild(s1);
+
+  const s2=document.createElement("section");
+  const h2t=document.createElement("h2"); h2t.textContent="当前状态";
+  s2.appendChild(h2t);
+  const grid=document.createElement("div"); grid.className="grid";
+  const f1=document.createElement("div"); f1.className="field"; f1.innerHTML='<label>等级</label>';
+  const st1=document.createElement("div"); st1.className="stepper";
+  const m1=mkBtn("−",()=>{S.level=Math.max(2,S.level-1);save();render();});
+  const v1=document.createElement("b"); v1.textContent=S.level;
+  const p1=mkBtn("＋",()=>{S.level=Math.min(10,S.level+1);save();render();});
+  st1.append(m1,v1,p1); f1.appendChild(st1);
+  const f2=document.createElement("div"); f2.className="field"; f2.innerHTML='<label>回合</label>';
+  const rw=document.createElement("div"); rw.className="row";
+  const se1=mkSel(1,7,S.stage,v=>{S.stage=v;save();render();});
+  const dash=document.createElement("span"); dash.style.color="var(--dim)"; dash.textContent="-";
+  const se2=mkSel(1,7,S.round,v=>{S.round=v;save();render();});
+  rw.append(se1,dash,se2); f2.appendChild(rw);
+  const f3=document.createElement("div"); f3.className="field"; f3.innerHTML='<label>金币</label>';
+  const gi=document.createElement("input"); gi.type="number"; gi.inputMode="numeric"; gi.min=0; gi.max=200; gi.value=S.gold;
+  gi.oninput=e=>{S.gold=Math.max(0,+e.target.value||0);save();renderAdvice(comp);renderEconLine();};
+  f3.appendChild(gi);
+  grid.append(f1,f2,f3); s2.appendChild(grid);
+  const ec=document.createElement("div"); ec.className="econ"; ec.id="econline"; s2.appendChild(ec);
+  app.appendChild(s2);
+
+  const s3=document.createElement("section");
+  const h3=document.createElement("h2"); h3.textContent="本回合建议";
+  s3.appendChild(h3);
+  const advBox=document.createElement("div"); advBox.id="advbox"; s3.appendChild(advBox);
+  app.appendChild(s3);
+
+  const s4=document.createElement("section");
+  const h4=document.createElement("h2"); h4.id="bdtitle"; s4.appendChild(h4);
+  const wrap=document.createElement("div"); wrap.className="bwrap";
+  const pb=document.createElement("div"); pb.className="pboard"; pb.id="pboard";
+  wrap.append(pb); s4.appendChild(wrap);
+  const chips=document.createElement("div"); chips.className="chips"; chips.id="bdchips"; s4.appendChild(chips);
+  const bh=document.createElement("div"); bh.className="mini"; bh.id="bdhint"; bh.style.marginTop="8px"; s4.appendChild(bh);
+  app.appendChild(s4);
+
+  const rb=document.createElement("button"); rb.className="btn"; rb.textContent="重新选择阵容（变阵 / 有同行时转线）";
+  rb.onclick=()=>{ S.comp=null; save(); renderSelect(); window.scrollTo(0,0); };
+  foot.appendChild(rb);
+  srcLine();
+
+  renderEconLine(); renderAdvice(comp); renderBoardMap(comp);
+}
+
+function renderEconLine(){
+  const el=document.getElementById("econline"); if(!el) return;
+  const it=Math.min(5,Math.floor(S.gold/10));
+  let t="利息：+"+it+" / 回合";
+  if(S.gold<50){ const nx=(Math.floor(S.gold/10)+1)*10; t+="　·　距下一档（"+nx+"金）差 "+(nx-S.gold)+" 金"; }
+  else t+="　·　已满档";
+  el.textContent=t;
+}
+function renderAdvice(comp){
+  const box=document.getElementById("advbox"); if(!box) return;
+  const a=advise(comp,S.level,S.stage,S.round,S.gold);
+  box.innerHTML="";
+  const d=document.createElement("div"); d.className="adv a-"+(a.k==="lv"?"lv":a.k==="roll"?"roll":"save");
+  const t1=document.createElement("div"); t1.className="act"; t1.textContent=a.act;
+  const t2=document.createElement("div"); t2.className="why"; t2.textContent=a.why;
+  d.append(t1,t2); box.appendChild(d);
+}
+const SHORT={"阿卡丽":"阿卡","厄加特":"厄加","莫甘娜":"莫甘","布里茨":"布里","薇古丝":"薇古","卡尔玛":"卡尔",
+"科加斯":"科加","丽桑卓":"丽桑","莎弥拉":"莎弥","雷克塞":"雷克","贝蕾亚":"贝蕾",
+"卑尔维斯":"卑尔","金克丝":"金克","小木灵":"木灵","阿萝拉":"萝拉","俄洛伊":"俄洛","蕾欧娜":"蕾欧",
+"亚托克斯":"亚托","凯特琳":"凯特","贾克斯":"贾克","崔斯特":"崔斯","内瑟斯":"内瑟","莫德凯撒":"莫德",
+"乐芙兰":"乐芙","格雷福斯":"格雷","菲奥娜":"菲奥","拉亚斯特":"拉亚","黛安娜":"黛安",
+"奥瑞利安·索尔":"索尔","努努和威朗普":"努努","厄运小姐":"厄运"};
+function renderBoardMap(comp){
+  const title=document.getElementById("bdtitle"), pb=document.getElementById("pboard"),
+        chips=document.getElementById("bdchips"), hint=document.getElementById("bdhint");
+  const b=boardFor(comp,S.level);
+  title.textContent = b.mode==="opener"
+    ? S.level+" 级 · 开局包（"+b.list.length+" 人口）"
+    : S.level+" 级最优阵容与站位（"+b.list.length+" 人口）";
+  pb.innerHTML="";
+  for(let r=1;r<=4;r++){
+    for(let c=1;c<=7;c++){
+      const cell=document.createElement("div"); cell.className="cell";
+      pb.appendChild(cell);
+      for(const [n,cost] of b.list){
+        const p=comp.pos[n];
+        if(p && p[0]===r && p[1]===c && !cell.classList.contains("f")){
+          cell.classList.add("f");
+          cell.style.borderColor="var(--c"+cost+")";
+          const t=document.createElement("div"); t.className="n"; t.textContent=SHORT[n]||n;
+          cell.appendChild(t);
+          break;
+        }
+      }
+    }
+  }
+  chips.innerHTML="";
+  b.list.forEach(([n,c])=>{
+    const s=document.createElement("span"); s.className="chip";
+    s.style.borderColor="var(--c"+c+")"; s.textContent=n;
+    chips.appendChild(s);
+  });
+  const tc={};
+  b.list.forEach(([n])=>{ (UNIT_TRAITS[n]||[]).forEach(t=>{ tc[t]=(tc[t]||0)+1; }); });
+  const tl=Object.entries(tc).sort((x,y)=>y[1]-x[1]).map(([t,k])=>t+"×"+k).join(" · ");
+  const tdiv=document.createElement("div"); tdiv.className="mini"; tdiv.style.marginTop="8px";
+  tdiv.textContent = tl ? "当前板羁绊构成（按数据库实时计算）："+tl : "";
+  chips.after(tdiv);
+  let ht;
+  if(b.mode==="opener"){
+    ht = "开局包：" + comp.opener.note + "。" + TRANS_NOTE;
+  }else{
+    ht = "第 1 行是我方前排（靠近敌方的一侧），第 4 行是我方后排。能不能 D 到不用管，缺谁 D 谁；遇刺客把主 C 换到另一侧后角。";
+    if(S.level > b.ref) ht += "（该阵容统计成型板为 "+b.ref+" 级；多出的人口为灵活位，放任意强力四/五费或补羁绊棋子，暂无统计数据支持具体棋子）";
+    if(S.level===6 || S.level===7) ht += " 6~7 级仍可保留质量过渡卡，不必急着全换成本阵容。";
+  }
+  hint.textContent = ht;
+}
+function mkBtn(t,fn){ const b=document.createElement("button"); b.className="sbtn"; b.textContent=t; b.onclick=fn; return b; }
+function mkSel(from,to,val,fn){
+  const s=document.createElement("select");
+  for(let i=from;i<=to;i++){const o=document.createElement("option");o.value=i;o.textContent=i;s.appendChild(o);}
+  s.value=val; s.onchange=e=>fn(+e.target.value); return s;
+}
+function srcLine(){
+  const d=document.createElement("div"); d.className="src";
+  d.textContent="数据：tactics.tools（Master+ 17.7）· OP.GG 实时页 · tftflow / metabot / Mobalytics（17.7）· 抓取与核对 2026-07-17 · 官方中文译名 · JP/SEA 分区数据下一版接入";
+  foot.appendChild(d);
+}
+/* =====================================================================
+   数据库 · 核对版
+   置信标记：✓ 多源确认 · ○ 单一来源 · ? 推断待核对 · 「待核对」完全未知
+   来源缩写：官=Riot官方 · M=Mobalytics · G=games.gg · E=eloboost24
+             T=tactics.tools · O=OP.GG · B=BunnyMuffins · F=tftflow/metabot
+   ===================================================================== */
+const DB = {
+meta:"数据截至 2026-07-17 · 补丁 17.7 · 羁绊表与棋子羁绊已全量确认：Mobalytics 官方羁绊页逐卡提取 + tftraits 各羁绊人数交叉验证（全部吻合）。剩余待核对：法官因果选项列表、部分棋子出装。",
+traits:[
+["新星特攻队 N.O.V.A.","5","亚托克斯✓ 凯特琳✓ 阿卡丽✓ 茂凯✓ 千珏✓","开战6秒全员『激涌』：亚托=全体破甲破魔30% · 凯特琳=全队+20%攻速 · 阿卡丽=全队精准(技能可暴击) · 茂凯=全队回12%血 · 千珏=最强坦克800盾；(5)可选一名新星触发强化打击"],
+["幻灵战队 Anima","5","贝蕾亚✓ 金克丝✓ 阿萝拉✓ 俄洛伊✓ 菲奥娜✓","连败叠Tech：每败+20再加5×连败数，幻灵参与击杀+2；每满100可拿Anima武器或攒着换更强的"],
+["法官 Arbiter","4","蕾欧娜✓ 佐伊✓ 黛安娜✓ 乐芙兰✓","(2)自选因+果书写法令；(3)效果增强；无4档"],
+["观星者 Stargazer","7","贾克斯✓ 璐璐✓ 努努和威朗普✓ 泰隆✓ 崔斯特✓ 霞✓ 薇古丝✓","每局绘制不同星象（野猪/秀山/蝰蛇/圣坛/勋章/泉水/女猎手），3~7人逐级增强。星象效果见④专区"],
+["暗星 Dark Star","6","科加斯✓ 丽桑卓✓ 莫德凯撒✓ 卡莎✓ 卡尔玛✓ 烬✓","(2)黑洞吞噬≤8%血敌人；(4)增伤；(6)最强暗星超巨星化+2小黑洞；(9)全员超巨星"],
+["木灵 Meeple","8","波比✓ 维迦✓ 纳尔✓ 小木灵✓ 菲兹✓ 库奇✓ 拉莫斯✓ 巴德✓","(3)/(5)吸引小木精强化技能+加血；(7)台面克隆槽(克隆得金币+1星复制)；(10)召唤四大木灵领主"],
+["太空律动 Space Groove","7","内瑟斯✓ 格温✓ 提莫✓ 奥恩✓ 莎弥拉✓ 娜美✓ 布里茨✓","律动状态给攻速+回血；(3)开战全员入律动；(5)律动内每秒+5%攻击/法强叠加；(7)再+5%"],
+["未来战士 Timebreaker","4","伊泽瑞尔✓ 米利欧✓ 潘森✓ 锐雯✓","(2)输了得免费刷新，赢了把XP存入时间核心(按阶段放大)；(3)全队+25%攻速；(4)未来战士再+40%攻速"],
+["海魔人 Primordian","3","贝蕾亚✓ 雷克塞✓ 卑尔维斯✓","(2)造伤生成虫群(按海魔人星级)；(3)虫群+45%，且每回合白嫖一张1/2费"],
+["灵能特工 Psionic","5","古拉加斯✓ 派克✓ 维克托✓ 易大师✓ 娑娜✓","获得可装给任意棋子的灵能装备；(4)灵能装在灵能单位上有额外效果。装备明细见③专区"],
+["织命人 Fateweaver","4","凯特琳✓ 崔斯特✓ 米利欧✓ 库奇✓","自带精准(技能可暴击)；(2)概率效果变幸运；(4)+20%暴击率与暴击伤害"],
+["霸天机甲 Mecha","3","奥瑞利安·索尔✓ 超级机甲✓ 厄加特✓","机甲可变身终极形态：技能升级+50%血，占2个人口且羁绊算2人；(3)/(4)能量强化；(6)+1人口上限"],
+["重装战士 Vanguard","6","蕾欧娜✓ 内瑟斯✓ 莫德凯撒✓ 俄洛伊✓ 努努和威朗普✓ 布里茨✓","前排坦克系职业"],
+["堡垒卫士 Bastion","6","亚托克斯✓ 波比✓ 贾克斯✓ 奥恩✓ 拉莫斯✓ 慎✓","全队护甲魔抗，堡垒卫士单位更多、开局10秒翻倍"],
+["斗士 Brawler","7","科加斯✓ 雷克塞✓ 古拉加斯✓ 潘森✓ 茂凯✓ 厄加特✓ 塔姆✓","血量系职业"],
+["挑战者 Challenger","5","金克丝✓ 黛安娜✓ 卑尔维斯✓ 千珏✓ 厄运小姐✓","攻速/追击系职业"],
+["狂战士 Marauder","5","阿卡丽✓ 卑尔维斯✓ 易大师✓ 厄加特✓ 菲奥娜✓","近战输出系职业"],
+["游侠 Rogue","6","贝蕾亚✓ 菲兹✓ 格温✓ 卡莎✓ 泰隆✓ 锐雯✓","切后排/仇恨管理系职业"],
+["狙神 Sniper","5","伊泽瑞尔✓ 纳尔✓ 莎弥拉✓ 霞✓ 烬✓","远程射手系职业"],
+["牧羊人 Shepherd","6","丽桑卓✓ 小木灵✓ 提莫✓ 俄洛伊✓ 乐芙兰✓ 娑娜✓","召唤牧羊双子Bia&Bayin，强度吃全队星级"],
+["魔术师 Replicator","6","丽桑卓✓ 维迦✓ 潘森✓ 璐璐✓ 娜美✓ 厄运小姐✓","复制体系职业"],
+["旅人 Voyager","5","阿萝拉✓ 派克✓ 小木灵✓ 卡尔玛✓ 超级机甲✓","位移/游走系职业"],
+["神谕 Conduit","6","佐伊✓ 莫德凯撒✓ 维克托✓ 奥瑞利安·索尔✓ 巴德✓ 厄运小姐✓","法力/施法系职业"],
+["唯一羁绊(每个1人)","—","黑暗魔女(Dark Lady)=莫甘娜✓(全队技能减伤10%，黑暗形态更高) · 斗神=菲奥娜✓(单人羁绊：赢时小小英雄回15%伤害，菲奥娜单挑必胜) · 暮光铁壁(Bulwark)=慎✓(放置圣物：邻格开战得10%血盾+10%攻速) · 最高指挥官(Commander)=娑娜✓(每2回合给指令模组，改变一名友军战斗行为) · 末日使者(Doomer)=薇古丝✓(开战给全体敌人厄兆：首次受击偷12%攻击/法强给最强薇古丝) · 军工1号(Factory New)=格雷福斯✓(战后军械库买永久强化，每3次强化后续+1回合) · 命运祭司(Oracle)=塔姆✓(每3回合发奖励) · 汪星机器人(Party Animal)=布里茨✓(低于45%血遁走维修，修满回场进入律动、弹幕四倍速) · 救世主(Redeemer)=拉亚斯特✓(每个激活的非唯一羁绊给全队攻速+双抗) · 武装战姬(Gun Goddess)=厄运小姐✓(上场时三选一模式：神谕/挑战者/魔术师，技能随模式变化并获得对应羁绊) · 灭世尊(Eradicator)=烬✓(敌人-10%双抗) · 天煞(Galaxy Hunter)=劫✓(仅『入侵者劫』强化获得，克隆存活时+40%攻击)",""],
+["特殊/召唤单位","—","劫=英雄强化专属5费(不进商店)✓ · 牧羊双子Bia&Bayin=牧羊人召唤✓ · 虫群/顶级海魔人=海魔人召唤✓","官方/G确认"]
+],
+arbiter:{
+  units:"蕾欧娜(1费·重装战士) · 佐伊(2费·神谕) · 黛安娜(3费·挑战者) · 乐芙兰(4费·牧羊人)",
+  mech:"(2) 法官：书写一条『神圣法令』——自选一个『因』(触发条件) + 一个『果』(对法官单位生效的效果)；(3) 法官：效果增强。没有 4 法官档位，所以 3 人就是满配，第 4 人只是备选灵活位。",
+  stat:"metabot 统计：乐芙兰是法官中胜率最高的单位(51.79%)，其次黛安娜(47.26%)、蕾欧娜(44.64%)。",
+  todo:"具体『因/果』选项列表：仍待核对（littlebuddybot.com/arbiter 是动态页面抓不到正文）。请你游戏内遇到法令选择界面时截图给我，我来补全。"
+},
+psionicItems:[
+["Biomatter Preserver（生命球装置）","+5%最大生命并部署3个生命球：战斗中每8秒掉落一个，回复持有者18%已损失生命。推荐：古拉加斯[M]"],
+["Drone Uplink（无人机链接）","无人机每3秒将持有者攻击与技能伤害的20~25%复读给相同目标。推荐：娑娜/维克托[M/O]"],
+["Malware Matrix（恶意程序矩阵）","物理系持有者造成物伤削减目标2点护甲；法术系造成法伤削减2点魔抗（技能触发内置0.75秒冷却）。推荐：易大师/派克[M]"],
+["Semiconductor（半导体）","法术系持有者+1法力回复；物理系持有者+10%攻速[M]"],
+["Sympathetic Implant（共感植入体）","提供法强与法力回复；每过5秒，额外获得每秒+1法力。推荐：娑娜/维克托[M]"],
+["Target-Lock Optics（锁定光学镜）","提供攻击力与攻速；对每个敌人的首次攻击额外造成150物理伤害。推荐：派克/易大师[M]"]
+],
+psionicNote:"机制：(2)得第1件灵能装，(4)得第2件且灵能单位佩戴时有额外效果[G]。全局共6件、每局发放顺序随机；棋子从棋盘挪回备战席时灵能装会被摘除[官方Wiki]。效果取自 Mobalytics 速查表，数值随补丁微调以游戏内为准；括号中文名为临时译名，官方中文名待核对。",
+constellations:[
+["野猪 The Boar","胜场获得金币；强化格内友军+8%生命/攻击/法强，观星者加成更高（档位越高金币与数值越多）[tftbuilder/redeemertft]"],
+["秀山 The Mountain","每5场玩家对战获得1个观星纹章；强化格内观星者获得递进加成：(3)+15%血 (4)再+15%攻击法强 (5)再+10双抗 (6)再+10%攻速 (7)再+6%耐久 (8)所有加成再+10% (11)每秒放逐一名敌人[redeemertft]"],
+["蝰蛇 The Serpent","强化格内友军+8%耐久；观星者加成更高并使敌人中毒——将部分已造成伤害转为3秒的魔法持续伤害。拖延型[tftbuilder/M]"],
+["圣坛 The Altar","任何单位阵亡都被献祭给圣坛；强化格内友军+10%生命+15%攻速；累计60次献祭后，格内观星者额外+25%生命+40%攻速[M/tftbuilder]"],
+["勋章 The Medallion","强化格内友军+15%增伤；你队伍中每有一个三星棋子额外+3%[tftbuilder]"],
+["泉水 The Fountain","强化格内友军+1法力回复；观星者更高，且施法时会治疗当前血量最低的友军。拖延型[tftbuilder]"],
+["女猎手 The Huntress","开战标记血量最高的敌人；强化格内友军+15%攻速，观星者更高，标记目标死亡时格内观星者回复最大生命（档位提升攻速与标记数：3档15%攻速/3标记 → 7档70%/9标记）[tftbuilder/blitz]"]
+],
+stargazerNote:"通用机制：每局只出现一种星象，棋盘出现强化格，数量随玩家等级增加[M]。站位原则：输出型星象（野猪/女猎手/勋章）优先把主C放进强化格；拖延型（蝰蛇/泉水）优先放主坦[G]。强度参考（tftflow 与 TFT Academy 口径一致）：蝰蛇/野猪/圣坛/秀山最强，泉水次之，女猎手偏弱，勋章基本别碰。",
+units:[
+/* [中文名, 英文名, 费, 羁绊(全部✓·来源M), 定位, 高频出装] */
+["亚托克斯","Aatrox",1,"新星特攻队✓ 堡垒卫士✓","前排坦 · 新星破抗工具人","坦装为主，通常不吃核心装 ※"],
+["贝蕾亚","Briar",1,"幻灵✓ 海魔人✓ 游侠✓","前排突进 · 破坦手(站敌方坦克前，掉血涨攻速)","通常载体位 ※"],
+["凯特琳","Caitlyn",1,"新星特攻队✓ 织命人✓","后排物理射手 · 新星攻速工具人","前期物理C载体 ※"],
+["科加斯","Cho'Gath",1,"暗星✓ 斗士✓","前排坦","坦装 ※"],
+["伊泽瑞尔","Ezreal",1,"未来战士✓ 狙神✓","后排物理射手","前期物理装载体[B] ※"],
+["蕾欧娜","Leona",1,"法官✓ 重装战士✓","前排坦 · 法官系唯一前排","坦装 ※"],
+["丽桑卓","Lissandra",1,"暗星✓ 牧羊人✓ 魔术师✓","后排法师 · 三羁绊工具人","过渡法师位 ※"],
+["内瑟斯","Nasus",1,"太空律动✓ 重装战士✓","前排坦","坦装 ※"],
+["波比","Poppy",1,"木灵✓ 堡垒卫士✓","前排坦","圣盾使的誓约[F] 等坦装"],
+["雷克塞","Rek'Sai",1,"海魔人✓ 斗士✓","前排坦/斗士","圣盾使的誓约·暮圭[T]+狂徒※"],
+["泰隆","Talon",1,"观星者✓ 游侠✓","突进刺客","前期刺客载体 ※"],
+["提莫","Teemo",1,"太空律动✓ 牧羊人✓","后排法师/工具人","过渡AP位 ※"],
+["崔斯特","Twisted Fate",1,"观星者✓ 织命人✓","后排法师","过渡法师位 ※"],
+["维迦","Veigar",1,"木灵✓ 魔术师✓","后排法师","过渡AP位 ※"],
+["阿卡丽","Akali",2,"新星特攻队✓ 狂战士✓","突进物理C · 新星精准工具人","海克斯科技枪刃·打击者连枷·死亡之刃[T]"],
+["卑尔维斯","Bel'Veth",2,"海魔人✓ 挑战者✓ 狂战士✓","近战物理副C","克拉肯之怒·水银·巨人杀手[T]"],
+["纳尔","Gnar",2,"木灵✓ 狙神✓","后排物理 · 木灵前期C(变身近战)","前期物理装载体[B] ※"],
+["古拉加斯","Gragas",2,"灵能特工✓ 斗士✓","前排斗士C(赌狗线)","珠光护手·正义之手[O旧]"],
+["格温","Gwen",2,"太空律动✓ 游侠✓","近战法伤","AP散件 ※"],
+["贾克斯","Jax",2,"观星者✓ 堡垒卫士✓","前排主坦","王冠护卫·石像鬼×2[O截图]"],
+["金克丝","Jinx",2,"幻灵✓ 挑战者✓","后排物理射手C","死亡之刃·海克斯科技枪刃·红霸符[T]"],
+["小木灵","Meepsie",2,"木灵✓ 牧羊人✓ 旅人✓","前排坦 · 三羁绊工具人","龙牙[F]等坦装"],
+["米利欧","Milio",2,"未来战士✓ 织命人✓","后排辅助/法师","莫雷洛秘典[F]·大帽·朔极[O旧]"],
+["莫德凯撒","Mordekaiser",2,"暗星✓ 神谕✓ 重装战士✓","前排坦 · 三羁绊工具人","坦装 ※"],
+["潘森","Pantheon",2,"未来战士✓ 斗士✓ 魔术师✓","前排斗士 · 三羁绊工具人","坦装 ※"],
+["派克","Pyke",2,"灵能特工✓ 旅人✓","突进/前排","坦装 ※"],
+["佐伊","Zoe",2,"法官✓ 神谕✓","后排法师","AP过渡位 ※"],
+["阿萝拉","Aurora",3,"幻灵✓ 旅人✓","后排法师副C","珠光护手·纳什之牙·朔极之矛[O]"],
+["黛安娜","Diana",3,"法官✓ 挑战者✓","突进法伤C","饮血剑·鬼索·泰坦的坚决[O]"],
+["菲兹","Fizz",3,"木灵✓ 游侠✓","近战法伤/工具人","离子火花·最后的轻语·打击者连枷[F]"],
+["俄洛伊","Illaoi",3,"幻灵✓ 重装战士✓ 牧羊人✓","前排主坦 · 三羁绊","石像鬼·狂徒·振奋[O]"],
+["卡莎","Kai'Sa",3,"暗星✓ 游侠✓","切后排射手","待核对"],
+["璐璐","Lulu",3,"观星者✓ 魔术师✓","后排法师C(赌狗线)","珠光护手·纳什之牙×2[O旧]"],
+["茂凯","Maokai",3,"新星特攻队✓ 斗士✓","前排坦 · 新星回血工具人","石像鬼·振奋·狂徒[O旧]"],
+["厄运小姐","Miss Fortune",3,"武装战姬✓(上场三选一：神谕/挑战者/魔术师)","后排物理C(赌狗线)","死亡之刃·鬼索·无尽[O旧]"],
+["奥恩","Ornn",3,"太空律动✓ 堡垒卫士✓","前排主坦","狂徒·石像鬼·坚定之心[T]"],
+["拉亚斯特","Rhaast",3,"救世主✓(唯一：按激活羁绊数给全队攻速双抗)","近战斗士 · 羁绊越多越强","饮血/挑战护手类 ※"],
+["莎弥拉","Samira",3,"太空律动✓ 狙神✓","后排物理C(赌狗线)","朔极之矛·无尽之刃·窃贼手套[T]"],
+["厄加特","Urgot",3,"霸天机甲✓ 斗士✓ 狂战士✓","物理副C · 可变身(占2人口)","死亡之刃·水银·挑战护手[O旧]"],
+["维克托","Viktor",3,"灵能特工✓ 神谕✓","后排法师C","待核对"],
+["奥瑞利安·索尔","Aurelion Sol",4,"霸天机甲✓ 神谕✓","后排法师主C · 可变身(占2人口)","珠光护手·大帽·大天使[T]"],
+["库奇","Corki",4,"木灵✓ 织命人✓","后排物理主C · 自带暴击","死亡之刃·最后的轻语·巨人杀手[F]（无尽有分歧）"],
+["卡尔玛","Karma",4,"暗星✓ 旅人✓","后排法师副C","海克斯科技枪刃·红霸符[T]"],
+["千珏","Kindred",4,"新星特攻队✓ 挑战者✓","后排物理副C · 新星护盾工具人","鬼索·红霸符·巨人杀手[O截图待确认]"],
+["乐芙兰","LeBlanc",4,"法官✓ 牧羊人✓","后排法师C · 法官胜率最高","鬼索·珠光护手·巨人杀手[G旧]"],
+["易大师","Master Yi",4,"灵能特工✓ 狂战士✓","突进物理C","夜之锋刃·巨人杀手[O旧]"],
+["莫甘娜","Morgana",4,"黑暗魔女✓(唯一)","前排坦 · 团队技能减伤","纯生命坦装：狂徒/振奋/荆棘/龙牙[B]，避免石像鬼"],
+["娜美","Nami",4,"太空律动✓ 魔术师✓","后排法辅副C","纳什之牙·朔极之矛[T]"],
+["努努和威朗普","Nunu & Willump",4,"观星者✓ 重装战士✓","前排主坦","圣盾使的誓约·狂徒·适应性头盔[T]"],
+["拉莫斯","Rammus",4,"木灵✓ 堡垒卫士✓","前排主坦 · 技能吃护甲","石像鬼·日炎·狂徒[F]（全甲装）"],
+["锐雯","Riven",4,"未来战士✓ 游侠✓","近战斗士副C","挑战护手[F]+输出散件；木灵纹章优先给她[B]"],
+["塔姆","Tahm Kench",4,"命运祭司✓ 斗士✓","前排主坦 · 每3回合发奖励","荆棘·王冠·狂徒[O旧] / 离子·日炎[O旧]"],
+["超级机甲","The Mighty Mech",4,"霸天机甲✓ 旅人✓","前排主坦 · 可变身(占2人口)","离子火花·日炎·坚定之心[T]"],
+["霞","Xayah",4,"观星者✓ 狙神✓","后排物理C","红霸符·克拉肯之怒×2[O旧]"],
+["巴德","Bard",5,"木灵✓ 神谕✓","后排法师/收尾C","大帽·朔极·虚空[O旧] / 卢登·蓝霸符·珠光[F]"],
+["布里茨","Blitzcrank",5,"汪星机器人✓ 太空律动✓ 重装战士✓","前排坦 · 开局钩最远角敌人 · 残血遁走维修","窃贼手套[T]"],
+["菲奥娜","Fiora",5,"斗神✓(单人羁绊) 幻灵✓ 狂战士✓","近战物理C · 单挑必胜","夜之锋刃·巨人杀手·挑战护手[O旧]"],
+["格雷福斯","Graves",5,"军工1号✓(战后军械库永久强化)","中排物理C · 越打越强","死亡之刃·水银·巨人杀手[T]"],
+["烬","Jhin",5,"暗星✓ 灭世尊✓ 狙神✓","后排狙击C · 自带全体破抗","死亡之刃·无尽·巨人杀手[O旧]"],
+["慎","Shen",5,"暮光铁壁✓ 堡垒卫士✓","前排坦 · 圣物贴主C放","坦装 ※"],
+["娑娜","Sona",5,"最高指挥官✓ 灵能特工✓ 牧羊人✓","后排辅助 · 指令模组","辅助装，不当输出[E]"],
+["薇古丝","Vex",5,"观星者✓ 末日使者✓(唯一：偷全场12%攻击/法强)","后排法师主C","红霸符·鬼索·大帽[T]"],
+["劫","Zed",5,"天煞✓(仅『入侵者劫』强化获得，不进商店)","突进刺客","待核对"]
+]
+};
+
+const UNIT_TRAITS={};
+DB.units.forEach(u=>{
+  const ts=[];
+  u[3].split(" ").forEach(t=>{ const i=t.indexOf("✓"); if(i>0) ts.push(t.slice(0,i)); });
+  UNIT_TRAITS[u[0]]=ts;
+});
+
+function renderDB(){
+  app.innerHTML=""; foot.innerHTML="";
+  const back=document.createElement("button"); back.className="btn"; back.style.marginBottom="2px";
+  back.textContent="← 返回助手";
+  back.onclick=()=>{ S.view="app"; save(); render(); window.scrollTo(0,0); };
+  app.appendChild(back);
+  const s0=document.createElement("section");
+  const h0=document.createElement("h2"); h0.textContent="数据库 · 核对版（请纠错）";
+  s0.appendChild(h0);
+  const m0=document.createElement("div"); m0.className="mini";
+  m0.textContent=DB.meta+"。标记说明：✓ 多来源确认 · ○ 单一来源 · ? 推断 · 「待核对」完全没有可靠来源。看到错的/能补的，直接回我文字或截图（游戏内羁绊面板最好），我逐条替换。";
+  s0.appendChild(m0);
+  app.appendChild(s0);
+
+  const s1=document.createElement("section");
+  const h1=document.createElement("h2"); h1.textContent="① 羁绊 → 棋子对照";
+  s1.appendChild(h1);
+  DB.traits.forEach(([n,cnt,units,note])=>{
+    const d=document.createElement("div"); d.className="role";
+    const rh=document.createElement("div"); rh.className="rh";
+    const nm=document.createElement("span"); nm.className="uname"; nm.textContent=n;
+    const c=document.createElement("span"); c.className="mini"; c.textContent=cnt==="—"?"":("共 "+cnt+" 人");
+    rh.append(nm,c);
+    const u=document.createElement("div"); u.className="mini"; u.textContent=units;
+    d.append(rh,u);
+    if(note){ const nn=document.createElement("div"); nn.className="mini"; nn.style.opacity=".75"; nn.textContent=note; d.appendChild(nn); }
+    s1.appendChild(d);
+  });
+  app.appendChild(s1);
+
+  const s2=document.createElement("section");
+  const h2=document.createElement("h2"); h2.textContent="② 法官（Arbiter）· 当前版本机制";
+  s2.appendChild(h2);
+  [["成员",DB.arbiter.units],["机制",DB.arbiter.mech],["数据",DB.arbiter.stat],["缺口",DB.arbiter.todo]].forEach(([k,v])=>{
+    const d=document.createElement("div"); d.className="role";
+    const rh=document.createElement("div"); rh.className="rh";
+    const t=document.createElement("span"); t.className="rname rsc"; t.textContent=k;
+    rh.appendChild(t);
+    const m=document.createElement("div"); m.className="mini"; m.textContent=v;
+    d.append(rh,m);
+    s2.appendChild(d);
+  });
+  app.appendChild(s2);
+
+  const sp=document.createElement("section");
+  const hp=document.createElement("h2"); hp.textContent="③ 灵能特工 · 装备一览（共 6 件）";
+  sp.appendChild(hp);
+  const pn=document.createElement("div"); pn.className="mini"; pn.textContent=DB.psionicNote; sp.appendChild(pn);
+  DB.psionicItems.forEach(([n,e])=>{
+    const d=document.createElement("div"); d.className="role"; d.style.marginTop="8px";
+    const rh=document.createElement("div"); rh.className="rh";
+    const nm=document.createElement("span"); nm.className="uname"; nm.textContent=n; rh.appendChild(nm);
+    const m=document.createElement("div"); m.className="mini"; m.textContent=e;
+    d.append(rh,m); sp.appendChild(d);
+  });
+  app.appendChild(sp);
+
+  const sg=document.createElement("section");
+  const hg=document.createElement("h2"); hg.textContent="④ 观星者 · 七星象效果";
+  sg.appendChild(hg);
+  const gn=document.createElement("div"); gn.className="mini"; gn.textContent=DB.stargazerNote; sg.appendChild(gn);
+  DB.constellations.forEach(([n,e])=>{
+    const d=document.createElement("div"); d.className="role"; d.style.marginTop="8px";
+    const rh=document.createElement("div"); rh.className="rh";
+    const nm=document.createElement("span"); nm.className="uname"; nm.textContent=n; rh.appendChild(nm);
+    const m=document.createElement("div"); m.className="mini"; m.textContent=e;
+    d.append(rh,m); sg.appendChild(d);
+  });
+  app.appendChild(sg);
+
+  const s3=document.createElement("section");
+  const h3=document.createElement("h2"); h3.textContent="⑤ 全棋子总表（63）· 羁绊 / 定位 / 高频出装";
+  s3.appendChild(h3);
+  let curCost=0;
+  DB.units.forEach(([cn,en,cost,traits,role,items])=>{
+    if(cost!==curCost){
+      curCost=cost;
+      const cd=document.createElement("div"); cd.className="mini";
+      cd.style.cssText="margin:10px 0 6px;font-weight:700;color:var(--c"+cost+")";
+      cd.textContent="── "+cost+" 费 ──";
+      s3.appendChild(cd);
+    }
+    const d=document.createElement("div"); d.className="role";
+    const rh=document.createElement("div"); rh.className="rh";
+    const nm=document.createElement("span"); nm.className="uname"; nm.textContent=cn;
+    nm.style.color="var(--c"+cost+")";
+    const e=document.createElement("span"); e.className="mini"; e.textContent=en;
+    rh.append(nm,e);
+    const t=document.createElement("div"); t.className="mini"; t.textContent="羁绊："+traits+"　·　定位："+role;
+    const i=document.createElement("div"); i.className="mini"; i.style.opacity=".8"; i.textContent="出装："+items;
+    d.append(rh,t,i);
+    s3.appendChild(d);
+  });
+  app.appendChild(s3);
+
+  const d=document.createElement("div"); d.className="src";
+  d.textContent="来源缩写：官=Riot官方 · M=Mobalytics · G=games.gg · E=eloboost24 · T=tactics.tools(Master+ 17.7) · O=OP.GG · B=BunnyMuffins · F=tftflow/metabot · ※=通用经验 · [O旧]=较早补丁的OP.GG快照，优先核对";
+  foot.appendChild(d);
+}
+
+function updateNav(){
+  const a=document.getElementById("navApp"), b=document.getElementById("navDB");
+  if(!a||!b) return;
+  a.style.background = S.view==="app" ? "#26315f" : "transparent";
+  a.style.color = S.view==="app" ? "var(--txt)" : "var(--dim)";
+  b.style.background = S.view==="db" ? "#26315f" : "transparent";
+  b.style.color = S.view==="db" ? "var(--txt)" : "var(--dim)";
+}
+document.getElementById("navApp").onclick=()=>{ S.view="app"; save(); render(); };
+document.getElementById("navDB").onclick=()=>{ S.view="db"; save(); render(); };
+
+function render(){
+  updateNav();
+  if(S.view==="db"){ renderDB(); return; }
+  S.comp ? renderMain() : renderSelect();
+}
+render();
+</script>
+</body>
+</html>
